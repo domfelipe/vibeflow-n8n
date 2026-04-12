@@ -69,6 +69,28 @@ Start here:
 - `templates/system-prompt.md`
 - `docs/conversation-contract.md`
 
+## Demo flow
+
+Use these files to create a polished first impression:
+
+- `docs/demo-assets.md`
+- `docs/demo-script.md`
+- `docs/recipes-gallery.md`
+- `assets/hero-banner.svg`
+- `assets/terminal-demo.svg`
+- `assets/workflow-demo.svg`
+- `assets/final-report-demo.svg`
+
+## Recipes to try first
+
+Fastest value demos:
+
+- `recipes/lead-triage.md`
+- `recipes/support-triage.md`
+- `recipes/invoice-reminder.md`
+- `recipes/ai-lead-enrichment.md`
+- `recipes/slack-to-notion-triage.md`
+
 ## Example prompt
 
 ```text
@@ -96,21 +118,27 @@ See:
 - `docs/launch-day-checklist.md`
 - `docs/tutorial-subir-github.md`
 
-## Safety and practical limits
+## Suggested launch stack
 
-The n8n MCP route is powerful, but not magic. Review the upstream limits before promising full automation behavior. The current n8n docs explicitly call out constraints such as a five-minute timeout, no binary input support, and no human-in-the-loop during MCP execution. citeturn863639search0
+For the first public version, ship with:
+
+- 1 hero banner
+- 3 to 5 screenshots or SVG placeholders
+- 1 short terminal GIF
+- 3 strong recipes in the README
+- 1 release with screenshots attached
 
 ## Roadmap
 
-Current release line: `0.5.0`
+Current release line: `0.6.0`
 
 Planned improvements include:
 
-- richer recipes by domain
-- test fixtures for client configs
+- sample workflow exports for safe local testing
+- recipe packs by team or department
 - validation helpers for plan payloads
-- gallery assets and demo GIFs
-- community issue labels and starter tasks
+- screenshots and GIFs from real runs
+- optional quality scoring for generated workflows
 
 See `docs/roadmap.md`.
 
@@ -171,6 +199,26 @@ Comece por aqui:
 - `templates/system-prompt.md`
 - `docs/conversation-contract.md`
 
+## Demonstração e vitrine
+
+Arquivos para montar uma landing page forte dentro do próprio README:
+
+- `docs/demo-assets.md`
+- `docs/demo-script.md`
+- `docs/recipes-gallery.md`
+- `assets/hero-banner.svg`
+- `assets/terminal-demo.svg`
+- `assets/workflow-demo.svg`
+- `assets/final-report-demo.svg`
+
+## Recipes para mostrar valor rápido
+
+- `recipes/lead-triage.md`
+- `recipes/support-triage.md`
+- `recipes/invoice-reminder.md`
+- `recipes/ai-lead-enrichment.md`
+- `recipes/slack-to-notion-triage.md`
+
 ## Exemplo de pedido
 
 ```text
@@ -197,11 +245,6 @@ Veja:
 - `docs/launch-assets.md`
 - `docs/launch-day-checklist.md`
 - `docs/tutorial-subir-github.md`
-
-## Referências
-
-- n8n MCP server docs: `docs.n8n.io`
-- GitHub publishing docs: `docs.github.com`
 
 ## Licença
 

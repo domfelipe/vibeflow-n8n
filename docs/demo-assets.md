@@ -4,7 +4,10 @@ Use this document to prepare screenshots, terminal captures, and visual assets f
 
 ## Recommended visuals
 
-### 1. Terminal intake flow
+### 1. Hero banner
+Use `assets/hero-banner.svg` as a temporary visual until you capture a real workflow screenshot.
+
+### 2. Terminal intake flow
 Show the agent asking for:
 - the workflow goal
 - trigger type
@@ -12,21 +15,22 @@ Show the agent asking for:
 - final action
 - exceptions or approvals
 
-### 2. Plan output
+### 3. Plan output
 Capture the normalized plan before the build starts.
 
-### 3. Build confirmation
-Show the agent summarizing what it created inside n8n.
-
-### 4. n8n workflow canvas
-Capture the resulting workflow with readable node names.
+### 4. Workflow canvas
+Use `assets/workflow-demo.svg` as a placeholder, or replace it with a real n8n screenshot.
 
 ### 5. Final handoff report
-Show the concise report listing:
-- what was created
-- assumptions used
-- missing credentials
-- test steps
+Use `assets/final-report-demo.svg` as a placeholder, or capture a real final report from the agent.
+
+## Included placeholder assets
+
+- `assets/hero-banner.svg`
+- `assets/terminal-demo.svg`
+- `assets/workflow-demo.svg`
+- `assets/final-report-demo.svg`
+- `assets/social-preview.svg`
 
 ## Capture tips
 
@@ -34,12 +38,7 @@ Show the concise report listing:
 - use short examples with familiar tools like Slack, Airtable, Gmail, HubSpot
 - prefer light, readable terminal themes
 - crop screenshots tightly
-- keep filenames predictable, for example:
-  - `demo-intake.png`
-  - `demo-plan.png`
-  - `demo-build.png`
-  - `demo-workflow.png`
-  - `demo-report.png`
+- keep filenames predictable
 
 ## Suggested README image order
 

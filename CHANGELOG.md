@@ -72,3 +72,12 @@ Initial public skeleton of the Vibeflow n8n skill kit.
 - system prompt
 - intake and final report templates
 - example plans and briefs
+
+
+## 0.6.0
+
+- added showcase-oriented demo docs
+- added placeholder SVG assets for hero, terminal, workflow, and report visuals
+- added AI lead enrichment and Slack-to-Notion triage recipes
+- updated README to highlight demo flow and stronger launch materials
+- updated roadmap for a showcase-ready release

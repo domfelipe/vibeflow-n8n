@@ -1,28 +1,28 @@
 # Roadmap
 
-## Current state: v0.3.0
+## Current state: v0.6.0
 
-V3 is designed to be GitHub-ready:
-- documentation is stronger
-- client setup is more concrete
-- a normalized plan schema exists
-- examples are easier to adapt
-- release flow is clearer
+V6 is designed to be showcase-ready:
+- launch and community docs are in place
+- client snippets are documented
+- normalized plan schema exists
+- demo-oriented recipes are stronger
+- placeholder visual assets are included for the first public version
 
-## v0.4.0 ideas
+## v0.7.0 ideas
 
-- richer sample plans across domains
-- optional validation checklist by workflow type
-- repository screenshots and terminal captures
-- sample `.mcp.json`, `config.toml`, and `opencode.jsonc` fixtures
-- stricter final report format
+- sample workflow exports for safe local testing
+- richer setup fixtures by client
+- validation helper scripts for plan payloads
+- GIFs and screenshots from real runs
+- recipe packs for sales, support, finance, and internal ops
 
-## v0.5.0 ideas
+## v0.8.0 ideas
 
-- test harness for plan validation
-- library of domain-specific recipes
-- template packs for lead ops, support ops, finance ops, and AI agents
-- optional workflow quality scoring rubric
+- optional plan linter
+- workflow quality checklist by recipe type
+- starter gallery page for examples
+- benchmark prompts for comparing clients
 
 ## Long-term direction
 
@@ -31,3 +31,4 @@ Turn Vibeflow n8n into a portable skill pack that:
 - plans before building
 - works across multiple MCP-capable coding agents
 - remains understandable to non-experts
+- feels demo-friendly from the first clone
