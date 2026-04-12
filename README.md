@@ -1,246 +1,470 @@
-# Vibeflow n8n
+# ⚡ Vibeflow n8n
 
-Build complete n8n workflows through MCP with any coding agent.
-Ask for the goal, generate a plan, build the workflow, validate it, and hand back a usable automation fast.
+<div align="center">
 
-**Planning-first n8n workflow generation for Codex, Claude Code, OpenCode, and other MCP-capable clients.**
+### Build complete n8n workflows through MCP with any coding agent.
 
-Português logo abaixo.
+**Vibe code your automation. Let the agent handle the wiring.**
 
-## What you get
+Create, update, and validate n8n workflows using **Codex CLI**, **Claude Code**, **OpenCode**, and other MCP-capable coding agents.
 
-- A practical **system prompt** for planning-first workflow generation
-- A **conversation contract** that keeps discovery short and useful
-- A normalized **plan schema** before any workflow is built
-- Client setup examples for **Codex**, **Claude Code**, and **OpenCode**
-- Demo-friendly **recipes**, visuals, launch copy, and release assets
+[![Version](https://img.shields.io/badge/version-0.7.0-black)](#-release-notes)
+[![n8n](https://img.shields.io/badge/n8n-MCP%20workflows-ff6d00)](#-why-vibeflow)
+[![MCP](https://img.shields.io/badge/MCP-agent%20compatible-blue)](#-supported-clients)
+[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
+[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)](#-contributing)
 
-## Why this exists
-
-Most people do not want to handcraft automation JSON, memorize node quirks, or map every edge case before the first test. They want to describe the workflow they need and let an agent do the heavy lifting.
-
-Vibeflow n8n is a skill-first open-source kit for agents and CLIs that support MCP. It helps an agent:
-
-- ask the right discovery questions
-- turn answers into a structured implementation plan
-- create or update workflows in n8n via MCP
-- validate the build before handoff
-- report assumptions, gaps, and next steps clearly
-
-## Supported clients
-
-Officially documented targets in this repo:
-
-- Codex CLI
-- Claude Code
-- OpenCode
-
-Experimental or community compatibility:
-
-- OpenClaude and similar MCP-capable forks
-
-## How it works
-
-The skill follows a simple five-step loop:
-
-1. Understand the workflow goal
-2. Ask only the questions that change implementation
-3. Produce a normalized plan
-4. Build or update the workflow in n8n via MCP
-5. Return a clean implementation report
-
-This keeps the user experience practical and intuitive, closer to vibe coding than ceremony.
-
-## Repo map
-
-```text
-.
-├── assets/
-├── clients/
-├── docs/
-├── examples/
-├── recipes/
-├── schemas/
-├── templates/
-└── .github/
-```
-
-## Start here
-
-- `docs/getting-started.md`
-- `docs/install.md`
-- `templates/system-prompt.md`
-- `docs/conversation-contract.md`
-- `schemas/plan.schema.json`
-
-## Quick start
-
-1. Connect an MCP-capable client to the n8n MCP server.
-2. Load the system prompt and conversation contract from this repo.
-3. Ask the agent to design or build a workflow in natural language.
-4. Let the agent gather the missing details, generate a plan, and build.
-
-Example request:
-
-```text
-Build me an n8n workflow that watches a Gmail inbox for invoices,
-saves PDF attachments to Google Drive, extracts key fields,
-logs them to a spreadsheet, and posts failures to Slack.
-Use safe defaults and ask only critical missing questions.
-```
-
-## What makes the workflow handoff good
-
-A successful run should leave the user with:
-
-- a clearly named workflow
-- a documented trigger and end state
-- noted assumptions and safe defaults
-- credential gaps called out explicitly
-- a compact test plan
-- obvious next upgrades
-
-## Demo-first assets
-
-Use these files to create a polished first impression:
-
-- `docs/demo-assets.md`
-- `docs/demo-script.md`
-- `docs/real-demo-playbook.md`
-- `docs/recipes-gallery.md`
-- `assets/hero-banner.svg`
-- `assets/terminal-demo.svg`
-- `assets/workflow-demo.svg`
-- `assets/final-report-demo.svg`
-
-## Recipes to try first
-
-Fastest value demos:
-
-- `recipes/lead-triage.md`
-- `recipes/support-triage.md`
-- `recipes/invoice-reminder.md`
-- `recipes/ai-lead-enrichment.md`
-- `recipes/slack-to-notion-triage.md`
-- `recipes/customer-support-escalation.md`
-- `recipes/hubspot-to-slack-qualification.md`
-
-## Publish-ready extras
-
-This repo includes launch materials for a public release:
-
-- GitHub description and tagline suggestions
-- release notes template
-- launch-day checklist
-- social copy ideas
-- issue and PR templates
-- starter labels and community onboarding docs
-
-See:
-
-- `docs/github-launch.md`
-- `docs/launch-assets.md`
-- `docs/launch-day-checklist.md`
-- `docs/tutorial-subir-github.md`
-- `docs/readme-premium-checklist.md`
-
-## Suggested launch stack
-
-For the first public version, ship with:
-
-- 1 hero banner
-- 3 to 5 screenshots or SVG placeholders
-- 1 short terminal GIF
-- 3 strong recipes in the README
-- 1 release with screenshots attached
-
-## Roadmap
-
-Current release line: `0.7.0`
-
-Planned improvements include:
-
-- sample workflow exports for safe local testing
-- recipe packs by team or department
-- validation helpers for plan payloads
-- screenshots and GIFs from real runs
-- optional quality scoring for generated workflows
-
-See `docs/roadmap.md`.
+</div>
 
 ---
 
-# Vibeflow n8n
+## ✨ What is Vibeflow n8n?
 
-Crie workflows completos no n8n via MCP com qualquer agente de código.
-Descreva o objetivo, deixe o agente planejar, construir, validar e devolver uma automação utilizável.
+**Vibeflow n8n** is an open-source skill kit for coding agents that lets anyone describe an automation in natural language and have the agent:
 
-**Geração de workflows no n8n com foco em planejamento, pronta para Codex, Claude Code, OpenCode e outros clientes MCP.**
+1. **ask the right questions**
+2. **generate a structured plan**
+3. **build the workflow in n8n through MCP**
+4. **validate the result**
+5. **return a clean implementation report**
 
-## O que você recebe
+Instead of wrestling with nodes, expressions, branching logic, and half-finished drafts, you get a guided workflow-building experience designed for **vibe coding with real structure**.
 
-- um **system prompt** prático para geração de workflows com planejamento prévio
-- um **contrato de conversa** para discovery curto e útil
-- um **schema de plano** normalizado antes da construção
-- exemplos de configuração para **Codex**, **Claude Code** e **OpenCode**
-- **recipes**, visuais, copy de lançamento e assets para vitrine
+---
 
-## Por que esse projeto existe
+## 🔥 Why Vibeflow?
 
-A maioria das pessoas não quer montar JSON na unha, decorar detalhes de nodes ou descobrir cada exceção antes do primeiro teste. Elas querem explicar o que precisam e deixar o agente fazer a parte pesada.
+Most agent-based automation flows fail for predictable reasons:
 
-O Vibeflow n8n é um kit open source orientado a skill para agentes e CLIs com suporte a MCP. Ele ajuda o agente a:
+* they start building too early
+* they skip business rules
+* they assume credentials and app behavior
+* they produce fragile workflows with no validation
+* they leave the user with a maze instead of an automation
 
-- fazer as perguntas certas
-- transformar as respostas em um plano estruturado
-- criar ou atualizar workflows no n8n via MCP
-- validar a construção antes da entrega
-- reportar suposições, lacunas e próximos passos com clareza
+**Vibeflow n8n** fixes that by forcing a better sequence:
 
-## O fluxo da skill
+* **brief first** 🧠
+* **plan next** 🗺️
+* **build with MCP** 🔧
+* **validate before delivery** ✅
+* **report what was done and what is missing** 📦
 
-1. Entende o objetivo do workflow
-2. Pergunta apenas o que muda a implementação
-3. Gera um plano normalizado
-4. Cria ou atualiza o workflow no n8n via MCP
-5. Entrega um relatório limpo de implementação
+It is opinionated in the useful places and flexible where real-world workflows vary.
 
-O resultado fica mais prático e intuitivo, bem no espírito de vibe coding.
+---
 
-## Início rápido
+## 🧭 How it works
 
-1. Conecte um cliente compatível com MCP ao servidor MCP do n8n.
-2. Carregue o system prompt e o contrato de conversa deste repositório.
-3. Peça ao agente, em linguagem natural, para desenhar ou construir um workflow.
-4. Deixe o agente levantar as lacunas críticas, montar o plano e construir.
+```mermaid
+flowchart LR
+    A[User describes workflow] --> B[Agent runs intake]
+    B --> C[Plan is normalized]
+    C --> D[Workflow built via n8n MCP]
+    D --> E[Validation and assumptions]
+    E --> F[Final delivery report]
+```
 
-Comece por aqui:
+### The default flow
 
-- `docs/getting-started.md`
-- `docs/install.md`
-- `templates/system-prompt.md`
-- `docs/conversation-contract.md`
-- `schemas/plan.schema.json`
+* **Intake**: understand goal, trigger, systems, outputs, business rules, and exceptions
+* **Planning**: transform free-form input into a structured build plan
+* **Execution**: create or update the workflow in n8n through MCP
+* **Validation**: inspect missing credentials, placeholders, trigger logic, branches, and node naming
+* **Delivery**: summarize what was created and what still needs manual configuration
 
-## Demonstração e vitrine
+---
 
-Arquivos para montar uma landing page forte dentro do próprio README:
+## 🧩 Supported clients
 
-- `docs/demo-assets.md`
-- `docs/demo-script.md`
-- `docs/real-demo-playbook.md`
-- `docs/recipes-gallery.md`
-- `assets/hero-banner.svg`
-- `assets/terminal-demo.svg`
-- `assets/workflow-demo.svg`
-- `assets/final-report-demo.svg`
+Vibeflow is built for **MCP-capable coding agents**.
 
-## Recipes para mostrar valor rápido
+### Officially documented in this repo
 
-- `recipes/lead-triage.md`
-- `recipes/support-triage.md`
-- `recipes/invoice-reminder.md`
-- `recipes/ai-lead-enrichment.md`
-- `recipes/slack-to-notion-triage.md`
-- `recipes/customer-support-escalation.md`
-- `recipes/hubspot-to-slack-qualification.md`
+* **Codex CLI**
+* **Claude Code**
+* **OpenCode**
+* **Community / experimental MCP clients**
+
+See:
+
+* [`clients/codex/`](./clients/codex)
+* [`clients/claude-code/`](./clients/claude-code)
+* [`clients/opencode/`](./clients/opencode)
+* [`clients/openclaude/`](./clients/openclaude)
+
+---
+
+## 🛠️ What you can build
+
+### Growth and ops
+
+* lead triage pipelines
+* AI lead enrichment
+* CRM qualification flows
+* inbound webhook routers
+* campaign handoff automations
+
+### Support workflows
+
+* support triage
+* escalation routing
+* Slack to Notion triage
+* ticket classification and enrichment
+
+### Finance and back office
+
+* invoice reminders
+* approval flows
+* billing follow-ups
+* notification pipelines
+
+### AI-powered workflows
+
+* summarize incoming data
+* classify requests
+* enrich records with LLM outputs
+* hand off low-confidence cases for review
+
+---
+
+## 🚀 Quick start
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/domfelipe/vibeflow-n8n.git
+cd vibeflow-n8n
+```
+
+### 2. Connect an MCP-compatible coding agent
+
+Pick your client and configure it using the examples in the `clients/` folder.
+
+### 3. Point your agent to Vibeflow instructions
+
+Use the prompt and behavioral contract from:
+
+* [`templates/system-prompt.md`](./templates/system-prompt.md)
+* [`docs/conversation-contract.md`](./docs/conversation-contract.md)
+* [`docs/skill-spec.md`](./docs/skill-spec.md)
+
+### 4. Ask for a workflow
+
+Example prompt:
+
+```text
+Build an n8n workflow that receives leads from a webhook, enriches them with AI, sends qualified leads to HubSpot, and notifies Slack when confidence is low.
+```
+
+### 5. Review the plan, then build
+
+The agent should:
+
+* ask follow-up questions only when needed
+* create a structured plan
+* build in n8n via MCP
+* validate the result
+* deliver a final report
+
+---
+
+## 🧠 Core design principles
+
+### 1. Plan before touching n8n
+
+No blind node generation.
+
+### 2. Ask only what changes the build
+
+No interrogation theater.
+
+### 3. Defaults should be helpful
+
+The agent should use safe, practical assumptions when possible.
+
+### 4. Report assumptions clearly
+
+What was inferred should never be hidden.
+
+### 5. Output should be editable by humans
+
+The workflow must still make sense inside n8n.
+
+---
+
+## 📁 Repository structure
+
+```text
+vibeflow-n8n/
+├── clients/
+│   ├── claude-code/
+│   ├── codex/
+│   ├── opencode/
+│   └── openclaude/
+├── docs/
+│   ├── architecture.md
+│   ├── conversation-contract.md
+│   ├── getting-started.md
+│   ├── github-launch.md
+│   ├── install.md
+│   ├── roadmap.md
+│   └── tutorial-subir-github.md
+├── examples/
+│   ├── sample-plan.json
+│   └── sample-workflow-export.json
+├── recipes/
+│   ├── ai-lead-enrichment.md
+│   ├── customer-support-escalation.md
+│   ├── hubspot-to-slack-qualification.md
+│   ├── invoice-reminder.md
+│   ├── lead-triage.md
+│   ├── slack-to-notion-triage.md
+│   └── support-triage.md
+├── schemas/
+│   └── plan.schema.json
+├── templates/
+│   ├── final-report-template.md
+│   ├── intake-checklist.md
+│   └── system-prompt.md
+└── README.md
+```
+
+---
+
+## ⚙️ Build contract
+
+Vibeflow expects agents to move through these stages:
+
+### Intake
+
+Capture:
+
+* workflow goal
+* trigger type
+* systems involved
+* desired output
+* business rules
+* exceptions
+* approval needs
+
+### Planning
+
+Generate a normalized plan with:
+
+* summary
+* trigger
+* apps and services
+* implementation steps
+* edge cases
+* validation checklist
+* required credentials
+* unresolved questions
+
+### Execution
+
+Use MCP to:
+
+* create or update the workflow
+* name nodes clearly
+* preserve readability
+* add placeholders where secrets are missing
+
+### Validation
+
+Check for:
+
+* broken branches
+* missing credentials
+* malformed assumptions
+* unclear node naming
+* weak error handling
+
+### Delivery
+
+Return:
+
+* what was built
+* what was assumed
+* what still needs manual setup
+* how to test it
+* suggested upgrades
+
+---
+
+## 📦 Example use cases
+
+### Example 1: Lead routing
+
+> “Build a workflow that receives website leads, scores them, enriches them with AI, and sends only qualified ones to HubSpot.”
+
+### Example 2: Support escalation
+
+> “Create a workflow that watches urgent support requests, classifies them, escalates high-risk cases to Slack, and creates a tracking record.”
+
+### Example 3: Billing reminder
+
+> “Build a recurring workflow that checks unpaid invoices every weekday and sends reminders only when due dates are inside policy.”
+
+See the full set in [`recipes/`](./recipes).
+
+---
+
+## 🖼️ Demo flow
+
+A clean public demo usually looks like this:
+
+1. show the natural-language request
+2. show the planning output
+3. show the workflow created in n8n
+4. show the final delivery report
+
+Helpful references:
+
+* [`docs/demo-script.md`](./docs/demo-script.md)
+* [`docs/real-demo-playbook.md`](./docs/real-demo-playbook.md)
+* [`docs/showcase-checklist.md`](./docs/showcase-checklist.md)
+
+---
+
+## 📚 Documentation
+
+### Start here
+
+* [`docs/getting-started.md`](./docs/getting-started.md)
+* [`docs/install.md`](./docs/install.md)
+* [`docs/architecture.md`](./docs/architecture.md)
+
+### Agent behavior
+
+* [`docs/skill-spec.md`](./docs/skill-spec.md)
+* [`docs/conversation-contract.md`](./docs/conversation-contract.md)
+* [`templates/system-prompt.md`](./templates/system-prompt.md)
+
+### Publishing and community
+
+* [`docs/github-launch.md`](./docs/github-launch.md)
+* [`docs/community-onboarding.md`](./docs/community-onboarding.md)
+* [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+* [`SECURITY.md`](./SECURITY.md)
+
+---
+
+## 🌍 Who is this for?
+
+Vibeflow is a good fit for:
+
+* automation builders using n8n
+* developers who prefer CLI agents
+* consultants delivering automation fast
+* internal ops teams
+* founders building workflows without a huge engineering ceremony
+* anyone who likes **vibe coding**, but also likes finishing things
+
+---
+
+## 🧪 Status
+
+Vibeflow is currently a **skill kit / workflow-building framework for coding agents**, with practical support material for MCP-based clients and progressive improvements across releases.
+
+If you want the fastest route to value, start with:
+
+* one recipe
+* one client
+* one end-to-end demo
+
+Then expand.
+
+---
+
+## 🗺️ Roadmap
+
+Planned areas of evolution:
+
+* richer client-specific setup examples
+* more production-grade workflow recipes
+* exportable demo workflows
+* stronger plan validation
+* public demo assets and GIFs
+* starter kits by domain
+
+See [`docs/roadmap.md`](./docs/roadmap.md).
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome.
+
+You can help by:
+
+* improving docs
+* adding recipes
+* refining client setup guides
+* validating agent behavior in real workflows
+* contributing examples and demos
+
+Start here:
+
+* [`CONTRIBUTING.md`](./CONTRIBUTING.md)
+* [`.github/ISSUE_TEMPLATE/`](./.github/ISSUE_TEMPLATE)
+* [`.github/DISCUSSION_TEMPLATE/`](./.github/DISCUSSION_TEMPLATE)
+
+---
+
+## 🛡️ Security
+
+Please do **not** commit secrets, credentials, or private tokens.
+
+If you find a security issue, check [`SECURITY.md`](./SECURITY.md).
+
+---
+
+## 📝 Release notes
+
+Recent release materials:
+
+* [`docs/release-v0.7.0.md`](./docs/release-v0.7.0.md)
+* [`CHANGELOG.md`](./CHANGELOG.md)
+
+---
+
+## 💬 Community
+
+This project is designed to become easier the more people share their patterns.
+
+If you build something cool with Vibeflow:
+
+* open a discussion
+* share your workflow idea
+* submit a recipe
+* improve the docs for the next builder
+
+---
+
+## ⭐ Support the project
+
+If this repo helps you build better automations:
+
+* give it a star
+* share it with your team
+* open an issue with ideas
+* contribute a recipe or improvement
+
+That kind of signal helps the project grow legs.
+
+---
+
+## 📄 License
+
+This project is available under the terms of the license in [`LICENSE`](./LICENSE).
+
+---
+
+<div align="center">
+
+### ⚡ Vibeflow n8n
+
+**Describe the workflow. Vibe code the idea. Let the agent build the machinery.**
+
+</div>
