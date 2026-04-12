@@ -1,0 +1,105 @@
+{
+  "plan_version": "0.3.0",
+  "workflow_name": "Typeform Lead Triage",
+  "objective": "Capture new Typeform submissions, summarize with AI, classify lead temperature, notify Slack for hot leads, and store all submissions in Airtable.",
+  "trigger": {
+    "type": "typeform_submission",
+    "summary": "Runs whenever a new Typeform response is received.",
+    "input_shape": "Form response payload with contact, answers, and metadata."
+  },
+  "systems": [
+    "Typeform",
+    "OpenAI",
+    "Slack",
+    "Airtable",
+    "n8n"
+  ],
+  "steps": [
+    {
+      "id": "step_1",
+      "name": "Receive submission",
+      "action": "Read the incoming Typeform payload."
+    },
+    {
+      "id": "step_2",
+      "name": "Summarize content",
+      "action": "Generate a concise summary with AI.",
+      "depends_on": [
+        "step_1"
+      ]
+    },
+    {
+      "id": "step_3",
+      "name": "Classify lead",
+      "action": "Assign hot, warm, or cold label.",
+      "depends_on": [
+        "step_2"
+      ]
+    },
+    {
+      "id": "step_4",
+      "name": "Branch urgent leads",
+      "action": "If hot, send a Slack alert.",
+      "depends_on": [
+        "step_3"
+      ]
+    },
+    {
+      "id": "step_5",
+      "name": "Persist record",
+      "action": "Write all leads to Airtable.",
+      "depends_on": [
+        "step_3"
+      ]
+    }
+  ],
+  "branching": [
+    {
+      "condition": "lead_temperature == 'hot'",
+      "path": "notify_slack"
+    },
+    {
+      "condition": "lead_temperature != 'hot'",
+      "path": "skip_slack"
+    }
+  ],
+  "credentials": [
+    {
+      "system": "Typeform",
+      "status": "required"
+    },
+    {
+      "system": "OpenAI",
+      "status": "required"
+    },
+    {
+      "system": "Slack",
+      "status": "required"
+    },
+    {
+      "system": "Airtable",
+      "status": "required"
+    }
+  ],
+  "assumptions": [
+    "The Typeform payload includes enough text to summarize.",
+    "Slack alerting is only required for hot leads.",
+    "Airtable base and table are already chosen by the user."
+  ],
+  "risks": [
+    "Missing credentials block full end-to-end testing.",
+    "Lead classification thresholds may need tuning after first runs."
+  ],
+  "validation": {
+    "checks": [
+      "Confirm the Typeform trigger fires with a real payload.",
+      "Confirm AI output contains both summary and label.",
+      "Confirm Slack only receives hot leads.",
+      "Confirm Airtable receives every submission."
+    ],
+    "manual_steps": [
+      "Connect credentials in n8n if placeholders were used.",
+      "Review the prompt used for classification before production rollout."
+    ]
+  }
+}

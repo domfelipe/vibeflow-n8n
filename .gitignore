@@ -1,0 +1,13 @@
+# local secrets
+.env
+.env.*
+
+# macOS
+.DS_Store
+
+# editor
+.vscode/
+.idea/
+
+# demo exports
+assets/private/

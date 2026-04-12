@@ -1,0 +1,15 @@
+title: Show and tell
+labels: [show-and-tell]
+body:
+  - type: textarea
+    id: built
+    attributes:
+      label: What did you build?
+      description: Share the workflow, recipe, or automation you created with Vibeflow n8n.
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+      description: What worked well, what was tricky, and what should improve?

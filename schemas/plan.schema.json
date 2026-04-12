@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/vibeflow-n8n/schemas/plan.schema.json",
+  "title": "Vibeflow n8n Plan",
+  "type": "object",
+  "required": [
+    "plan_version",
+    "objective",
+    "trigger",
+    "systems",
+    "steps",
+    "credentials",
+    "assumptions",
+    "validation"
+  ],
+  "properties": {
+    "plan_version": {
+      "type": "string"
+    },
+    "workflow_name": {
+      "type": "string"
+    },
+    "objective": {
+      "type": "string"
+    },
+    "trigger": {
+      "type": "object",
+      "required": [
+        "type",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "schedule": {
+          "type": "string"
+        },
+        "input_shape": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": true
+    },
+    "systems": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "action"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "depends_on": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "branching": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "condition",
+          "path"
+        ],
+        "properties": {
+          "condition": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "credentials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "system",
+          "status"
+        ],
+        "properties": {
+          "system": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "required",
+              "optional",
+              "configured",
+              "placeholder"
+            ]
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "checks"
+      ],
+      "properties": {
+        "checks": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "manual_steps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
