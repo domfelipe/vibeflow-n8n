@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.7.0
+
+- refreshed README for a stronger public-facing landing experience
+- added a real-demo playbook for terminal-to-n8n walkthroughs
+- added README premium checklist for launch polish
+- added customer support escalation and HubSpot-to-Slack qualification recipes
+- added an illustrative sample workflow export JSON for documentation and local experimentation
+- added release notes for v0.7.0
+
+## 0.6.0
+
+- added showcase-oriented demo docs
+- added placeholder SVG assets for hero, terminal, workflow, and report visuals
+- added AI lead enrichment and Slack-to-Notion triage recipes
+- updated README to highlight demo flow and stronger launch materials
+- updated roadmap for a showcase-ready release
+
 ## 0.5.0
 
 - Added launch-ready branding files, including logo and social preview SVG assets
@@ -72,12 +89,3 @@ Initial public skeleton of the Vibeflow n8n skill kit.
 - system prompt
 - intake and final report templates
 - example plans and briefs
-
-
-## 0.6.0
-
-- added showcase-oriented demo docs
-- added placeholder SVG assets for hero, terminal, workflow, and report visuals
-- added AI lead enrichment and Slack-to-Notion triage recipes
-- updated README to highlight demo flow and stronger launch materials
-- updated roadmap for a showcase-ready release

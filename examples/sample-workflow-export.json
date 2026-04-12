@@ -1,0 +1,57 @@
+{
+  "name": "Vibeflow Demo - Support Escalation",
+  "active": false,
+  "meta": {
+    "source": "vibeflow-n8n",
+    "note": "Illustrative export skeleton for documentation and local experimentation."
+  },
+  "nodes": [
+    {
+      "id": "Webhook_1",
+      "name": "Incoming Ticket",
+      "type": "n8n-nodes-base.webhook",
+      "position": [260, 280],
+      "parameters": {
+        "path": "support-escalation-demo",
+        "httpMethod": "POST"
+      }
+    },
+    {
+      "id": "Set_1",
+      "name": "Normalize Payload",
+      "type": "n8n-nodes-base.set",
+      "position": [520, 280],
+      "parameters": {
+        "keepOnlySet": false,
+        "values": {
+          "string": [
+            {"name": "ticket_id", "value": "={{$json.id || ''}}"},
+            {"name": "priority", "value": "={{$json.priority || 'normal'}}"},
+            {"name": "summary", "value": "={{$json.summary || ''}}"}
+          ]
+        }
+      }
+    },
+    {
+      "id": "If_1",
+      "name": "Urgent?",
+      "type": "n8n-nodes-base.if",
+      "position": [780, 280],
+      "parameters": {
+        "conditions": {
+          "string": [
+            {"value1": "={{$json.priority}}", "operation": "equal", "value2": "high"}
+          ]
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Incoming Ticket": {
+      "main": [[{"node": "Normalize Payload", "type": "main", "index": 0}]]
+    },
+    "Normalize Payload": {
+      "main": [[{"node": "Urgent?", "type": "main", "index": 0}]]
+    }
+  }
+}

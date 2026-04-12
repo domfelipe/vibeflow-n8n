@@ -3,7 +3,17 @@
 Build complete n8n workflows through MCP with any coding agent.
 Ask for the goal, generate a plan, build the workflow, validate it, and hand back a usable automation fast.
 
+**Planning-first n8n workflow generation for Codex, Claude Code, OpenCode, and other MCP-capable clients.**
+
 Português logo abaixo.
+
+## What you get
+
+- A practical **system prompt** for planning-first workflow generation
+- A **conversation contract** that keeps discovery short and useful
+- A normalized **plan schema** before any workflow is built
+- Client setup examples for **Codex**, **Claude Code**, and **OpenCode**
+- Demo-friendly **recipes**, visuals, launch copy, and release assets
 
 ## Why this exists
 
@@ -29,7 +39,7 @@ Experimental or community compatibility:
 
 - OpenClaude and similar MCP-capable forks
 
-## What the skill does
+## How it works
 
 The skill follows a simple five-step loop:
 
@@ -55,6 +65,14 @@ This keeps the user experience practical and intuitive, closer to vibe coding th
 └── .github/
 ```
 
+## Start here
+
+- `docs/getting-started.md`
+- `docs/install.md`
+- `templates/system-prompt.md`
+- `docs/conversation-contract.md`
+- `schemas/plan.schema.json`
+
 ## Quick start
 
 1. Connect an MCP-capable client to the n8n MCP server.
@@ -62,19 +80,33 @@ This keeps the user experience practical and intuitive, closer to vibe coding th
 3. Ask the agent to design or build a workflow in natural language.
 4. Let the agent gather the missing details, generate a plan, and build.
 
-Start here:
+Example request:
 
-- `docs/getting-started.md`
-- `docs/install.md`
-- `templates/system-prompt.md`
-- `docs/conversation-contract.md`
+```text
+Build me an n8n workflow that watches a Gmail inbox for invoices,
+saves PDF attachments to Google Drive, extracts key fields,
+logs them to a spreadsheet, and posts failures to Slack.
+Use safe defaults and ask only critical missing questions.
+```
 
-## Demo flow
+## What makes the workflow handoff good
+
+A successful run should leave the user with:
+
+- a clearly named workflow
+- a documented trigger and end state
+- noted assumptions and safe defaults
+- credential gaps called out explicitly
+- a compact test plan
+- obvious next upgrades
+
+## Demo-first assets
 
 Use these files to create a polished first impression:
 
 - `docs/demo-assets.md`
 - `docs/demo-script.md`
+- `docs/real-demo-playbook.md`
 - `docs/recipes-gallery.md`
 - `assets/hero-banner.svg`
 - `assets/terminal-demo.svg`
@@ -90,17 +122,10 @@ Fastest value demos:
 - `recipes/invoice-reminder.md`
 - `recipes/ai-lead-enrichment.md`
 - `recipes/slack-to-notion-triage.md`
+- `recipes/customer-support-escalation.md`
+- `recipes/hubspot-to-slack-qualification.md`
 
-## Example prompt
-
-```text
-Build me an n8n workflow that watches a Gmail inbox for invoices,
-saves PDF attachments to Google Drive, extracts key fields,
-logs them to a spreadsheet, and posts failures to Slack.
-Use safe defaults and ask only critical missing questions.
-```
-
-## Launch assets and publishing
+## Publish-ready extras
 
 This repo includes launch materials for a public release:
 
@@ -117,6 +142,7 @@ See:
 - `docs/launch-assets.md`
 - `docs/launch-day-checklist.md`
 - `docs/tutorial-subir-github.md`
+- `docs/readme-premium-checklist.md`
 
 ## Suggested launch stack
 
@@ -130,7 +156,7 @@ For the first public version, ship with:
 
 ## Roadmap
 
-Current release line: `0.6.0`
+Current release line: `0.7.0`
 
 Planned improvements include:
 
@@ -149,6 +175,16 @@ See `docs/roadmap.md`.
 Crie workflows completos no n8n via MCP com qualquer agente de código.
 Descreva o objetivo, deixe o agente planejar, construir, validar e devolver uma automação utilizável.
 
+**Geração de workflows no n8n com foco em planejamento, pronta para Codex, Claude Code, OpenCode e outros clientes MCP.**
+
+## O que você recebe
+
+- um **system prompt** prático para geração de workflows com planejamento prévio
+- um **contrato de conversa** para discovery curto e útil
+- um **schema de plano** normalizado antes da construção
+- exemplos de configuração para **Codex**, **Claude Code** e **OpenCode**
+- **recipes**, visuais, copy de lançamento e assets para vitrine
+
 ## Por que esse projeto existe
 
 A maioria das pessoas não quer montar JSON na unha, decorar detalhes de nodes ou descobrir cada exceção antes do primeiro teste. Elas querem explicar o que precisam e deixar o agente fazer a parte pesada.
@@ -161,21 +197,7 @@ O Vibeflow n8n é um kit open source orientado a skill para agentes e CLIs com s
 - validar a construção antes da entrega
 - reportar suposições, lacunas e próximos passos com clareza
 
-## Clientes suportados
-
-Alvos documentados oficialmente neste repositório:
-
-- Codex CLI
-- Claude Code
-- OpenCode
-
-Compatibilidade experimental ou comunitária:
-
-- OpenClaude e forks semelhantes com suporte a MCP
-
-## O que a skill faz
-
-A skill segue um ciclo simples de cinco etapas:
+## O fluxo da skill
 
 1. Entende o objetivo do workflow
 2. Pergunta apenas o que muda a implementação
@@ -198,6 +220,7 @@ Comece por aqui:
 - `docs/install.md`
 - `templates/system-prompt.md`
 - `docs/conversation-contract.md`
+- `schemas/plan.schema.json`
 
 ## Demonstração e vitrine
 
@@ -205,6 +228,7 @@ Arquivos para montar uma landing page forte dentro do próprio README:
 
 - `docs/demo-assets.md`
 - `docs/demo-script.md`
+- `docs/real-demo-playbook.md`
 - `docs/recipes-gallery.md`
 - `assets/hero-banner.svg`
 - `assets/terminal-demo.svg`
@@ -218,34 +242,5 @@ Arquivos para montar uma landing page forte dentro do próprio README:
 - `recipes/invoice-reminder.md`
 - `recipes/ai-lead-enrichment.md`
 - `recipes/slack-to-notion-triage.md`
-
-## Exemplo de pedido
-
-```text
-Crie um workflow no n8n que monitore um inbox de Gmail para notas fiscais,
-salve anexos PDF no Google Drive, extraia campos principais,
-registre tudo em uma planilha e envie falhas para o Slack.
-Use defaults seguros e pergunte só o que for crítico.
-```
-
-## Publicação no GitHub
-
-Este repositório já inclui material para lançamento:
-
-- sugestões de descrição e tagline
-- template de release notes
-- checklist de lançamento
-- ideias de copy para divulgação
-- templates de issues e PRs
-- docs de onboarding para comunidade
-
-Veja:
-
-- `docs/github-launch.md`
-- `docs/launch-assets.md`
-- `docs/launch-day-checklist.md`
-- `docs/tutorial-subir-github.md`
-
-## Licença
-
-Consulte `LICENSE`.
+- `recipes/customer-support-escalation.md`
+- `recipes/hubspot-to-slack-qualification.md`
