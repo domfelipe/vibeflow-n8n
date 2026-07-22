@@ -4,7 +4,7 @@ Target release: 2026-07-24
 
 ## Decision
 
-**APTO COM RESSALVAS** for the Friday release, pending the remote CI and released-install checks listed below.
+**APTO COM RESSALVAS** for the Friday release, pending merge, tag, and released-install checks listed below.
 
 No blocking defect remains in the reviewed static-analysis boundary. Vibeflow can verify structural evidence in an exported workflow, but it cannot enforce authorization, amount limits, counterparty identity, audit durability, or recovery behavior in the executing systems.
 
@@ -56,15 +56,15 @@ The graph checks use actual `main` edges, require dominating controls, and rejec
 - an exported graph cannot prove a referenced credential, approval identity, SQL policy, external API limit, notification, or compensation works at runtime;
 - custom/community nodes may need explicit impact declarations or new regression-backed adapters;
 - repository owners may intentionally weaken policy outside `--locked` mode;
-- remote Node 20/22/24 CI and released `npx`/plugin installation can only be confirmed after the candidate is pushed and tagged.
+- remote Node 20/22/24 CI passed; released `npx`/plugin installation can only be confirmed after the candidate is tagged.
 
 ## Release blockers
 
-- [ ] Pull request CI passes on Node.js 20, 22, and 24.
+- [x] Pull request CI passes on Node.js 20, 22, and 24.
 - [ ] Release commit is merged without unrelated changes.
 - [ ] `v0.9.0` tag and GitHub release are published on 2026-07-24.
 - [ ] Released CLI and Codex plugin install paths are smoke-tested.
 
 ## Final gate
 
-There are zero known critical or high security findings in the local candidate. The release remains **APTO COM RESSALVAS** until the four remote gates above are complete; a failed gate blocks publication or requires an immediate corrective release.
+There are zero known critical or high security findings in the candidate. The release remains **APTO COM RESSALVAS** until the remaining remote gates above are complete; a failed gate blocks publication or requires an immediate corrective release.

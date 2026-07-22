@@ -8,7 +8,7 @@ Target: Friday, 2026-07-24
 - [x] Safe and unsafe refund fixtures are reproducible.
 - [x] Local `npm run verify` and `npm audit --omit=dev` pass.
 - [x] QA, adversarial Red Team, and Guardião reviews are documented.
-- [ ] Pull request CI passes on Node.js 20, 22, and 24.
+- [x] Pull request CI passes on Node.js 20, 22, and 24.
 - [ ] Release commit is merged and tagged `v0.9.0`.
 - [ ] Released CLI and pinned Codex marketplace install successfully.
 - [ ] GitHub release is published on Friday.

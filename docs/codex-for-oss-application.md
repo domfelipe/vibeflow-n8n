@@ -105,7 +105,7 @@ Refresh this section on 2026-07-24 immediately before submission. Current candid
 
 - public repository with MIT license;
 - `v0.9.0` release candidate, with v0.8.0 already public;
-- 36 local adversarial tests; remote Node.js 20, 22, and 24 CI remains a release gate;
+- 36 adversarial tests passing locally and in remote Node.js 20, 22, and 24 CI;
 - dependency-free CLI, GitHub Action, and installable Codex plugin;
 - 3 prior maintainer PRs merged with green CI; add the v0.9 PR after merge;
 - 2 stars, 0 forks, and no verified external contributor yet;
