@@ -19,7 +19,7 @@ Use the CLI as the source of truth. Do not infer that a workflow is safe from it
    For a released version without a checkout:
 
    ```bash
-   npx --yes github:domfelipe/vibeflow-n8n#v0.8.0 check path/to/workflow.json
+   npx --yes github:domfelipe/vibeflow-n8n#4998605ed7dc12b9b867d69d7005d25778c7e109 check path/to/workflow.json
    ```
 
 3. Read [references/policies.md](references/policies.md) when interpreting or repairing a finding.
