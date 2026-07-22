@@ -89,7 +89,7 @@ test("plugin and skill manifests contain no scaffold placeholders", async () => 
   const plugin = JSON.parse(await readFile(pluginPath, "utf8"));
   const skill = await readFile(skillPath, "utf8");
   assert.equal(plugin.name, "vibeflow");
-  assert.equal(plugin.version, "0.8.0");
+  assert.equal(plugin.version, "0.9.0");
   assert.match(skill, /^---\nname: vibeflow\ndescription: .+\n---/);
   assert.doesNotMatch(`${JSON.stringify(plugin)}\n${skill}`, /\[TODO:/);
 });
@@ -175,6 +175,20 @@ test("idempotency must be atomic and dominate inbound side-effect paths", () => 
   assert.equal(findingFor(workflowWith([nodes[0], guard, nodes[1]], {
     Webhook: { main: [[connection(guard.name)]] },
     [guard.name]: { main: [[connection("Send")]] },
+  }), "VF005", "Send"), true);
+
+  guard.parameters.query = "INSERT INTO event_ledger VALUES ($1) ON CONFLICT DO NOTHING RETURNING event_id";
+  guard.continueOnFail = true;
+  assert.equal(findingFor(workflowWith([nodes[0], guard, nodes[1]], {
+    Webhook: { main: [[connection(guard.name)]] },
+    [guard.name]: { main: [[connection("Send")]] },
+  }), "VF005", "Send"), true);
+
+  guard.continueOnFail = false;
+  guard.onError = "continueErrorOutput";
+  assert.equal(findingFor(workflowWith([nodes[0], guard, nodes[1]], {
+    Webhook: { main: [[connection(guard.name)]] },
+    [guard.name]: { main: [[connection("Send")], [connection("Send")]] },
   }), "VF005", "Send"), true);
 });
 
@@ -301,6 +315,175 @@ test("error handling must be connected or configured at workflow level", () => {
     Loop: { main: [[connection(request.name)]] },
   });
   assert.equal(findingFor(indirectLoop, "VF004", request.name), true);
+});
+
+test("ordinary HTTP money actions require a critical outcome contract", () => {
+  const refund = {
+    name: "Issue refund",
+    type: "n8n-nodes-base.httpRequest",
+    parameters: { method: "POST", url: "https://payments.invalid/refund" },
+  };
+  const workflow = workflowWith([refund], {}, { executionTimeout: 120, errorWorkflow: "global-errors" });
+  assert.equal(findingFor(workflow, "VF010", refund.name), true);
+  assert.equal(findingFor(workflow, "VF013", refund.name), true);
+
+  refund.parameters.method = "GET";
+  assert.equal(findingFor(workflow, "VF010", refund.name), false);
+});
+
+test("complete money outcome contract passes VF010 through VF013", () => {
+  const { workflow, config } = moneyOutcomeFixture();
+  const findings = inspectWorkflow(workflow, config);
+  for (const ruleId of ["VF010", "VF011", "VF012", "VF013"]) {
+    assert.equal(findings.some((finding) => finding.ruleId === ruleId), false, ruleId);
+  }
+});
+
+test("incomplete money contracts report missing structural policy evidence", () => {
+  const { workflow } = moneyOutcomeFixture();
+  workflow.connections.Webhook = { main: [[connection("Record refund audit")]] };
+  const config = normalizeConfig({ outcomeContracts: { "Issue refund": { impact: "money" } } });
+  const findings = inspectWorkflow(workflow, config);
+  const critical = findings.find((finding) => finding.ruleId === "VF010" && finding.node?.name === "Issue refund");
+  assert.match(critical.message, /auditNode/);
+  assert.match(critical.message, /idempotency/);
+  assert.match(critical.message, /approvalNode/);
+  assert.match(critical.message, /amountGuard/);
+  assert.match(critical.message, /counterpartyGuard/);
+  assert.equal(findingForWithConfig(workflow, config, "VF013", "Issue refund"), true);
+});
+
+test("customer communications and destructive writes require external outcome contracts", () => {
+  const customerMessage = {
+    name: "Notify customer",
+    type: "n8n-nodes-base.httpRequest",
+    parameters: { method: "POST", url: "https://messaging.invalid/customer-message" },
+  };
+  const destructiveWrite = {
+    name: "Execute maintenance query",
+    type: "n8n-nodes-base.postgres",
+    parameters: { operation: "executeQuery", query: "DELETE FROM records WHERE id = $1" },
+  };
+  const workflow = workflowWith([customerMessage, destructiveWrite], {}, {
+    executionTimeout: 120,
+    errorWorkflow: "global-errors",
+  });
+  assert.equal(findingFor(workflow, "VF011", customerMessage.name), true);
+  assert.equal(findingFor(workflow, "VF011", destructiveWrite.name), true);
+});
+
+test("audit-like labels cannot hide an uncontracted money action", () => {
+  const paymentHistory = {
+    name: "Update payment history",
+    type: "n8n-nodes-base.postgres",
+    parameters: { operation: "update", table: "payment_history" },
+  };
+  const workflow = workflowWith([paymentHistory], {}, { executionTimeout: 120, errorWorkflow: "global-errors" });
+  assert.equal(findingFor(workflow, "VF010", paymentHistory.name), true);
+});
+
+test("connected error paths must reach a recognized operator notification", () => {
+  const request = {
+    name: "Create external record",
+    type: "n8n-nodes-base.httpRequest",
+    onError: "continueErrorOutput",
+    parameters: { method: "POST" },
+  };
+  const stop = { name: "Failure stop", type: "n8n-nodes-base.noOp", parameters: {} };
+  const silent = workflowWith([request, stop], {
+    [request.name]: { main: [[], [connection(stop.name)]] },
+  });
+  assert.equal(findingFor(silent, "VF012", request.name), true);
+
+  const alert = {
+    name: "Operator error alert",
+    type: "n8n-nodes-base.slack",
+    onError: "continueErrorOutput",
+    parameters: { channel: "operations", text: "Failure alert" },
+  };
+  const notified = workflowWith([request, alert, stop], {
+    [request.name]: { main: [[], [connection(alert.name)]] },
+    [alert.name]: { main: [[], [connection(stop.name)]] },
+  });
+  assert.equal(findingFor(notified, "VF012", request.name), false);
+});
+
+test("named but disconnected policy nodes cannot satisfy an outcome contract", () => {
+  const { workflow, config } = moneyOutcomeFixture();
+  workflow.connections.Webhook = { main: [[connection("Issue refund")]] };
+  assert.equal(findingForWithConfig(workflow, config, "VF010", "Issue refund"), true);
+});
+
+test("constant approvals and read-only audit labels do not satisfy outcome contracts", () => {
+  const constantApproval = moneyOutcomeFixture();
+  constantApproval.workflow.nodes.find((node) => node.name === "Approve refund").parameters = {
+    conditions: { boolean: [{ value1: true, value2: true }] },
+    note: "approved",
+  };
+  assert.equal(findingForWithConfig(constantApproval.workflow, constantApproval.config, "VF010", "Issue refund"), true);
+
+  const readOnlyAudit = moneyOutcomeFixture();
+  readOnlyAudit.workflow.nodes.find((node) => node.name === "Record refund audit").parameters = {
+    operation: "executeQuery",
+    query: "SELECT * FROM refund_audit",
+  };
+  assert.equal(findingForWithConfig(readOnlyAudit.workflow, readOnlyAudit.config, "VF010", "Issue refund"), true);
+
+  const decorativeAmount = moneyOutcomeFixture();
+  decorativeAmount.workflow.nodes.find((node) => node.name === "Limit refund amount").parameters = {
+    conditions: { boolean: [{ value1: true, value2: true }] },
+    note: "={{ $json.amount }}",
+    maximum: 500,
+    currency: "USD",
+  };
+  assert.equal(findingForWithConfig(decorativeAmount.workflow, decorativeAmount.config, "VF010", "Issue refund"), true);
+
+  const failOpenAudit = moneyOutcomeFixture();
+  const auditNode = failOpenAudit.workflow.nodes.find((node) => node.name === "Record refund audit");
+  auditNode.onError = "continueErrorOutput";
+  failOpenAudit.workflow.connections["Record refund audit"] = {
+    main: [[connection("Approve refund")], [connection("Issue refund")]],
+  };
+  assert.equal(findingForWithConfig(failOpenAudit.workflow, failOpenAudit.config, "VF010", "Issue refund"), true);
+});
+
+test("outcome contracts resist prototype keys and self-referential evidence", () => {
+  const prototypeConfig = normalizeConfig(JSON.parse(`{
+    "outcomeContracts": {
+      "__proto__": { "impact": "customer" }
+    }
+  }`));
+  assert.equal(Object.hasOwn(prototypeConfig.outcomeContracts, "__proto__"), true);
+  assert.equal(Object.getPrototypeOf(prototypeConfig.outcomeContracts), Object.prototype);
+
+  const { workflow } = moneyOutcomeFixture();
+  const config = normalizeConfig({
+    outcomeContracts: {
+      "Issue refund": {
+        impact: "money",
+        approvalNode: "Approve refund",
+        auditNode: "Record refund audit",
+        failureNotificationNode: "Issue refund",
+        amountGuard: { node: "Limit refund amount", maximum: 500, currency: "USD" },
+        counterpartyGuard: { node: "Allow refund account", allowed: ["merchant-primary"] },
+        recovery: { strategy: "compensate", node: "Issue refund" },
+      },
+    },
+  });
+  const findings = inspectWorkflow(workflow, config);
+  assert.equal(findings.some((finding) => finding.ruleId === "VF010" && /failureNotificationNode/.test(finding.message)), true);
+  assert.equal(findings.some((finding) => finding.ruleId === "VF013"), true);
+});
+
+test("outcome contract configuration rejects ambiguous shapes", () => {
+  assert.throws(() => normalizeConfig({ outcomeContracts: [] }), /must be an object/);
+  assert.throws(() => normalizeConfig({ outcomeContracts: { Refund: { impact: "physical" } } }), /must declare impact/);
+  assert.throws(() => normalizeConfig({
+    outcomeContracts: { Refund: { impact: "money", amountGuard: { node: "Limit", maximum: -1, currency: "usd" } } },
+  }), /positive finite number/);
+  assert.throws(() => normalizeConfig({
+    outcomeContracts: { Refund: { impact: "money", recovery: { node: "Undo", strategy: "hope" } } },
+  }), /must be compensate, rollback, or replay/);
 });
 
 test("malformed connection metadata cannot fabricate graph edges", () => {
@@ -457,6 +640,86 @@ function hasRule(workflow, ruleId) {
 
 function findingFor(workflow, ruleId, nodeName) {
   return inspectWorkflow(workflow).some((finding) => finding.ruleId === ruleId && finding.node?.name === nodeName);
+}
+
+function findingForWithConfig(workflow, config, ruleId, nodeName) {
+  return inspectWorkflow(workflow, config).some((finding) => finding.ruleId === ruleId && finding.node?.name === nodeName);
+}
+
+function moneyOutcomeFixture() {
+  const nodes = [
+    {
+      name: "Webhook",
+      type: "n8n-nodes-base.webhook",
+      parameters: { authentication: "headerAuth" },
+      credentials: { httpHeaderAuth: { id: "credential-reference" } },
+    },
+    {
+      name: "Claim idempotency event",
+      type: "n8n-nodes-base.postgres",
+      parameters: { query: "INSERT INTO event_ledger VALUES ($1) ON CONFLICT DO NOTHING RETURNING event_id" },
+    },
+    {
+      name: "Record refund audit",
+      type: "n8n-nodes-base.postgres",
+      parameters: { operation: "insert", table: "refund_audit" },
+    },
+    {
+      name: "Approve refund",
+      type: "n8n-nodes-base.if",
+      parameters: { conditions: { boolean: [{ value1: "={{ $json.approved }}", value2: true }] } },
+    },
+    {
+      name: "Limit refund amount",
+      type: "n8n-nodes-base.if",
+      parameters: { conditions: { number: [{ value1: "={{ $json.amount }}", operation: "smallerEqual", value2: 500 }] }, currency: "USD" },
+    },
+    {
+      name: "Allow refund account",
+      type: "n8n-nodes-base.switch",
+      parameters: { value: "={{ $json.counterparty }}", rules: [{ value: "merchant-primary" }] },
+    },
+    {
+      name: "Issue refund",
+      type: "n8n-nodes-base.httpRequest",
+      onError: "continueErrorOutput",
+      parameters: { method: "POST", url: "https://payments.invalid/refund" },
+    },
+    {
+      name: "Notify refund failure",
+      type: "n8n-nodes-base.slack",
+      parameters: { channel: "operations", text: "Notify failure for refund" },
+    },
+    {
+      name: "Compensate transaction",
+      type: "n8n-nodes-base.httpRequest",
+      parameters: { method: "POST", url: "https://payments.invalid/reverse", operation: "compensate" },
+    },
+  ];
+  const connections = {
+    Webhook: { main: [[connection("Claim idempotency event")]] },
+    "Claim idempotency event": { main: [[connection("Record refund audit")]] },
+    "Record refund audit": { main: [[connection("Approve refund")]] },
+    "Approve refund": { main: [[connection("Limit refund amount")], []] },
+    "Limit refund amount": { main: [[connection("Allow refund account")], []] },
+    "Allow refund account": { main: [[connection("Issue refund")], []] },
+    "Issue refund": { main: [[], [connection("Notify refund failure"), connection("Compensate transaction")]] },
+  };
+  const workflow = workflowWith(nodes, connections, { executionTimeout: 120, errorWorkflow: "global-errors" });
+  const config = normalizeConfig({
+    outcomeContracts: {
+      "Issue refund": {
+        impact: "money",
+        approvalNode: "Approve refund",
+        auditNode: "Record refund audit",
+        failureNotificationNode: "Notify refund failure",
+        amountGuard: { node: "Limit refund amount", maximum: 500, currency: "USD" },
+        counterpartyGuard: { node: "Allow refund account", allowed: ["merchant-primary"] },
+        recovery: { strategy: "compensate", node: "Compensate transaction" },
+      },
+    },
+  });
+  return { workflow, config };
 }
 
 function runCli(args) {

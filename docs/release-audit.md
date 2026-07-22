@@ -1,54 +1,70 @@
-# Release audit — v0.8.0
+# Release audit — v0.9.0 candidate
 
-Date: 2026-07-22
+Target release: 2026-07-24
 
 ## Decision
 
-**APTO COM RESSALVAS** for the first public executable release.
+**APTO COM RESSALVAS** for the Friday release, pending the remote CI and released-install checks listed below.
 
-No blocking defect remains in the reviewed static-analysis boundary. The remaining caveats require runtime or node-specific knowledge that an exported JSON gate cannot prove.
+No blocking defect remains in the reviewed static-analysis boundary. Vibeflow can verify structural evidence in an exported workflow, but it cannot enforce authorization, amount limits, counterparty identity, audit durability, or recovery behavior in the executing systems.
 
 ## QA evidence
 
-- 26 automated tests pass, including one safe and one intentionally unsafe workflow.
-- The safe fixture produces zero findings; the unsafe fixture produces VF001-VF009.
-- Text, JSON, and SARIF output paths are exercised.
-- Node 20, 22, and 24 are required in CI; local verification used the available Node runtime and the remote matrix is the release gate.
-- JSON/YAML parsing, package dry-run, official skill/plugin validators, `npm audit`, and `git diff --check` are part of the final gate.
+- 36 automated tests pass, including safe and unsafe support workflows and a fully contracted refund workflow.
+- The unsafe refund fixture detects an ordinary HTTP node as a money outcome and produces VF010, VF012, and VF013.
+- The contracted refund fixture exits 0 in normal and `--locked` modes.
+- Text, JSON, SARIF, configuration validation, package packing, and CLI exit behavior are exercised.
+- `npm run verify`, `npm audit --omit=dev`, JSON parsing, and `git diff --check` pass locally.
+- The package remains dependency-free and targets Node.js 20+.
 
 ## Red Team
 
-The first implementation was rejected. Regression tests now cover the reproduced bypasses:
+The first v0.9 implementation was hardened after adversarial review. Regression tests now cover:
 
-- declared webhook authentication without the matching credential reference;
-- literal secrets in raw headers, URLs, expressions, pinned data, and static data;
-- disconnected, nominal, or non-gating idempotency controls;
-- parallel AI paths that bypass a kill switch, inverted or constant conditions, and decorative Code/NoOp nodes;
-- resource connections misread as control flow and fabricated connection shapes;
-- disconnected or cyclic error handling;
-- read-only HTTP requests mislabeled as handoff;
-- excessive or non-numeric timeouts and unsafe retry settings;
-- policy weakening from an untrusted checkout;
-- terminal-control injection, deep JSON, excessive nodes/edges/files/config terms, finding amplification, and quadratic traversal.
+1. ordinary HTTP refunds that would evade a dangerous-node-only policy;
+2. read-only refund queries, preventing an obvious classifier false positive;
+3. named or disconnected approval, amount, counterparty, audit, and idempotency controls;
+4. constant approval conditions and decorative amount values;
+5. read-only or fail-open audit nodes, including an audit error branch that still reaches the action;
+6. fail-open idempotency nodes and idempotency error branches that still reach the side effect;
+7. prototype-like contract keys, self-referential notification/recovery evidence, and audit-like labels used to hide a money action;
+8. connected error paths that terminate without a recognized operator notification.
 
-At the 5,000-node limit, the corrected linear traversal completed the synthetic chain in tens of milliseconds on the development machine. Finding truncation always adds blocking VF000.
+The graph checks use actual `main` edges, require dominating controls, and reject evidence that reaches the action after the control itself fails.
 
-## Supply chain
+## Guardião security review
 
-- GitHub-owned actions are pinned to full verified commit SHAs.
-- Checkout credentials are not persisted; workflow permissions are `contents: read`.
-- Jobs have a ten-minute timeout and package installation ignores scripts.
-- The package has no runtime dependencies and uses a publish allowlist.
-- The bundled action always enables `--locked`.
+### In scope
 
-The first merge SHA, `4998605ed7dc12b9b867d69d7005d25778c7e109`, pins the CLI, GitHub Action, and Codex marketplace examples before the release tag is created.
+- local CLI parsing of untrusted workflow/configuration JSON;
+- graph and parameter analysis;
+- text, JSON, and SARIF output;
+- npm package contents, GitHub Action boundary, and Codex plugin instructions.
 
-## Residual limitations
+### Controls confirmed
 
-- Static analysis cannot prove a referenced credential exists or works.
-- SQL and IF checks are high-confidence structural evidence, not runtime execution proofs.
-- An HTTP POST labeled as a ticket or handoff may still fail or target the wrong service.
-- Unknown community nodes may require a new side-effect adapter and regression fixture.
-- Repository owners must still review changes to the CI workflow itself.
+- no runtime dependencies, telemetry, hosted service, or live n8n mutation;
+- no workflow expressions or embedded code are evaluated;
+- no URLs found in a workflow are contacted;
+- file, node, edge, contract, vocabulary, and finding budgets are bounded;
+- terminal text is sanitized and prototype-like contract keys are handled as data;
+- the GitHub Action uses locked policy mode so a pull request cannot disable its own built-in checks;
+- examples contain credential references and reserved invalid domains, not live secrets.
 
-The official Codex Security workspace was opened, but its setup was never submitted through the app interface; no result from that scanner is claimed here. The release decision is based on the direct QA, independent Red Team, supply-chain review, and regression evidence above.
+### Residual limitations
+
+- an exported graph cannot prove a referenced credential, approval identity, SQL policy, external API limit, notification, or compensation works at runtime;
+- custom/community nodes may need explicit impact declarations or new regression-backed adapters;
+- repository owners may intentionally weaken policy outside `--locked` mode;
+- remote Node 20/22/24 CI and released `npx`/plugin installation can only be confirmed after the candidate is pushed and tagged.
+
+## Release blockers
+
+- [ ] Pull request CI passes on Node.js 20, 22, and 24.
+- [ ] Release commit is merged without unrelated changes.
+- [ ] `v0.9.0` tag and GitHub release are published on 2026-07-24.
+- [ ] Released CLI and Codex plugin install paths are smoke-tested.
+
+## Final gate
+
+There are zero known critical or high security findings in the local candidate. The release remains **APTO COM RESSALVAS** until the four remote gates above are complete; a failed gate blocks publication or requires an immediate corrective release.

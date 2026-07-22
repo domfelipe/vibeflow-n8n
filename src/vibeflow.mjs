@@ -1,7 +1,7 @@
 import { access, readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 
-export const VERSION = "0.8.0";
+export const VERSION = "0.9.0";
 export const MAX_WORKFLOW_BYTES = 25 * 1024 * 1024;
 export const MAX_CONFIG_BYTES = 256 * 1024;
 export const MAX_WORKFLOW_FILES = 1_000;
@@ -71,6 +71,30 @@ export const RULES = Object.freeze({
     description: "Retries need idempotency, bounded attempts, and backoff.",
     remediation: "Add a deduplication guard, keep maxTries between 2 and 5, and wait at least 100 ms.",
   },
+  VF010: {
+    name: "uncontracted-critical-outcome",
+    severity: "error",
+    description: "Money and privileged actions need an explicit, structurally verified outcome contract.",
+    remediation: "Define an outcomeContracts entry with approval, audit, idempotency, limits, failure notification, and recovery evidence.",
+  },
+  VF011: {
+    name: "uncontracted-external-outcome",
+    severity: "warning",
+    description: "Customer communications and destructive data writes need an explicit outcome contract.",
+    remediation: "Define an outcomeContracts entry that identifies the impact and its audit, notification, and recovery nodes.",
+  },
+  VF012: {
+    name: "silent-error-path",
+    severity: "warning",
+    description: "A connected error path should notify or escalate to an operator.",
+    remediation: "Route the error output to a recognized alert, incident, ticket, or human escalation node.",
+  },
+  VF013: {
+    name: "missing-recovery-contract",
+    severity: "warning",
+    description: "High-impact writes need a declared compensation, rollback, or replay path.",
+    remediation: "Declare a recovery strategy and reference the workflow node that implements it.",
+  },
 });
 
 const DEFAULT_CONFIG = Object.freeze({
@@ -79,6 +103,14 @@ const DEFAULT_CONFIG = Object.freeze({
     killSwitch: ["agent-off", "kill switch", "agent enabled", "ai enabled", "agent status", "pause ai"],
     humanHandoff: ["human handoff", "handoff", "human review", "escalate", "manual review", "chatwoot", "ticket"],
     idempotency: ["idempotency", "idempotent", "dedupe", "deduplicate", "duplicate", "event ledger", "event id"],
+    approval: ["approval", "approved", "authorize", "authorized", "human review"],
+    audit: ["audit", "ledger", "journal", "event log", "history"],
+    failureNotification: ["error alert", "failure alert", "notify failure", "incident", "pager", "escalate error"],
+    outcomeMoney: ["refund", "payment", "payout", "charge", "transfer funds", "withdraw"],
+    outcomeCustomer: ["customer message", "customer notification", "notify customer", "client message", "patient message"],
+    outcomePrivileged: ["delete account", "revoke access", "grant access", "change role", "disable user", "publish"],
+    outcomeData: ["delete record", "drop table", "truncate", "purge", "overwrite data"],
+    recovery: ["compensate", "rollback", "replay", "reverse", "restore", "recovery"],
   },
   bannedNodeTypes: [
     "n8n-nodes-base.executecommand",
@@ -86,6 +118,7 @@ const DEFAULT_CONFIG = Object.freeze({
     "n8n-nodes-base.readwritefile",
     "n8n-nodes-base.localfiletrigger",
   ],
+  outcomeContracts: {},
 });
 
 const SIDE_EFFECT_SUFFIXES = [
@@ -150,6 +183,34 @@ const HANDOFF_SUFFIXES = [
   ".jira",
 ];
 
+const DURABLE_AUDIT_SUFFIXES = [
+  ".postgres",
+  ".mysql",
+  ".microsoftsql",
+  ".supabase",
+  ".datatable",
+  ".mongodb",
+  ".dynamodb",
+  ".s3",
+  ".airtable",
+];
+
+const COMMUNICATION_SUFFIXES = [
+  ".httprequest",
+  ".slack",
+  ".gmail",
+  ".emailsend",
+  ".telegram",
+  ".twilio",
+  ".microsoftteams",
+  ".discord",
+  ".zendesk",
+  ".freshdesk",
+  ".intercom",
+  ".servicenow",
+  ".jira",
+];
+
 const TRIGGER_SUFFIXES = [".webhook", ".formtrigger", ".chattrigger", ".telegramtrigger", ".stripetrigger"];
 const SAFE_LITERAL = /^(?:<[^>]+>|redacted|change[-_ ]?me|your[-_ ].*|example(?:[-_ ].*)?|placeholder(?:[-_ ].*)?)$/i;
 
@@ -183,7 +244,7 @@ export function normalizeConfig(input = {}, { locked = false } = {}) {
   if (!input || typeof input !== "object" || Array.isArray(input)) {
     throw new Error("Vibeflow config must be a JSON object");
   }
-  const allowedKeys = new Set(["$schema", "rules", "terms", "bannedNodeTypes"]);
+  const allowedKeys = new Set(["$schema", "rules", "terms", "bannedNodeTypes", "outcomeContracts"]);
   const unknownKey = Object.keys(input).find((key) => !allowedKeys.has(key));
   if (unknownKey) throw new Error(`Unknown config key: ${unknownKey}`);
   const config = cloneDefaults();
@@ -232,6 +293,10 @@ export function normalizeConfig(input = {}, { locked = false } = {}) {
     config.bannedNodeTypes = normalizedTypes;
   }
 
+  if (input.outcomeContracts !== undefined) {
+    config.outcomeContracts = normalizeOutcomeContracts(input.outcomeContracts);
+  }
+
   return config;
 }
 
@@ -278,6 +343,7 @@ export function inspectWorkflow(workflow, config = cloneDefaults()) {
   if (shapeError) return [invalidFinding(shapeError)];
   const nodes = workflow.nodes;
   const { adjacency, reverse } = buildGraph(workflow.connections ?? {});
+  const nodesByName = new Map(nodes.map((node) => [node.name, node]));
   const aiNodes = nodes.filter(isAiAgent);
   const triggerNodes = nodes.filter(isInboundTrigger);
   const sideEffectNodes = nodes.filter(isSideEffect);
@@ -288,13 +354,14 @@ export function inspectWorkflow(workflow, config = cloneDefaults()) {
     .map((node) => node.name));
   const handoffNames = nodes.filter((node) => isHumanHandoff(node, config.terms.humanHandoff)).map((node) => node.name);
   const idempotencyNames = new Set(nodes.filter((node) => isAtomicIdempotencyGuard(node, config.terms.idempotency)).map((node) => node.name));
+  const failureNotificationNames = new Set(nodes
+    .filter((node) => isFailureNotification(node, config.terms.failureNotification))
+    .map((node) => node.name));
   const allReachable = traverseGraph(adjacency, entryNames);
   const reachableWithoutKillSwitch = traverseGraph(adjacency, entryNames, killSwitchNames);
   const canReachHandoff = traverseGraph(reverse, handoffNames);
   const triggerNames = triggerNodes.map((node) => node.name);
   const triggerReachable = traverseGraph(adjacency, triggerNames);
-  const triggerReachableWithoutIdempotency = traverseGraph(adjacency, triggerNames, idempotencyNames);
-  const entryReachableWithoutIdempotency = traverseGraph(adjacency, entryNames, idempotencyNames);
   const workflowHasErrorHandler = typeof workflow.settings?.errorWorkflow === "string" && workflow.settings.errorWorkflow.trim();
   const findings = [];
   let findingsTruncated = false;
@@ -339,10 +406,19 @@ export function inspectWorkflow(workflow, config = cloneDefaults()) {
       add("VF004", "External-action node has no connected error output or workflow error handler", node);
     }
 
+    if (isSideEffect(node)
+      && !failureNotificationNames.has(node.name)
+      && !workflowHasErrorHandler
+      && hasConnectedErrorPath(node, workflow.connections ?? {})
+      && !errorBranchCanReach(node.name, failureNotificationNames, workflow.connections ?? {}, adjacency)) {
+      add("VF012", "Connected error output terminates without a recognized operator notification or escalation", node);
+    }
+
     if (isSideEffect(node) && node.retryOnFail === true) {
       const maxTries = Number(node.maxTries ?? 3);
       const waitBetweenTries = Number(node.waitBetweenTries ?? 0);
-      if (!idempotencyNames.has(node.name) && (!allReachable.has(node.name) || entryReachableWithoutIdempotency.has(node.name))) {
+      if (!idempotencyNames.has(node.name)
+        && !hasProtectedIdempotencyPath(node.name, entryNames, idempotencyNames, adjacency, workflow.connections ?? {})) {
         add("VF009", "Retry is enabled on a path without an atomic idempotency guard", node);
       }
       if (!Number.isFinite(maxTries) || maxTries < 2 || maxTries > 5) {
@@ -374,12 +450,26 @@ export function inspectWorkflow(workflow, config = cloneDefaults()) {
   }
 
   for (const sideEffectNode of sideEffectNodes) {
-    if (!idempotencyNames.has(sideEffectNode.name)
+    if (!failureNotificationNames.has(sideEffectNode.name)
+      && !idempotencyNames.has(sideEffectNode.name)
       && triggerReachable.has(sideEffectNode.name)
-      && triggerReachableWithoutIdempotency.has(sideEffectNode.name)) {
+      && !hasProtectedIdempotencyPath(sideEffectNode.name, triggerNames, idempotencyNames, adjacency, workflow.connections ?? {})) {
       add("VF005", "Inbound path reaches this external side effect without an atomic idempotency guard", sideEffectNode);
     }
   }
+
+  inspectOutcomeContracts({
+    nodes,
+    nodesByName,
+    config,
+    adjacency,
+    connections: workflow.connections ?? {},
+    entryNames,
+    allReachable,
+    idempotencyNames,
+    failureNotificationNames,
+    add,
+  });
 
   for (const aiNode of aiNodes) {
     if (!allReachable.has(aiNode.name) || reachableWithoutKillSwitch.has(aiNode.name)) {
@@ -462,7 +552,80 @@ function cloneDefaults() {
     rules: { ...DEFAULT_CONFIG.rules },
     terms: Object.fromEntries(Object.entries(DEFAULT_CONFIG.terms).map(([key, values]) => [key, [...values]])),
     bannedNodeTypes: [...DEFAULT_CONFIG.bannedNodeTypes],
+    outcomeContracts: {},
   };
+}
+
+function normalizeOutcomeContracts(input) {
+  if (!input || typeof input !== "object" || Array.isArray(input)) {
+    throw new Error("config.outcomeContracts must be an object keyed by exact node name");
+  }
+  const entries = Object.entries(input);
+  if (entries.length > 1_000) throw new Error("config.outcomeContracts must contain at most 1000 entries");
+  const normalizedEntries = [];
+  for (const [nodeName, value] of entries) {
+    if (!nodeName.trim() || nodeName.length > 200) {
+      throw new Error("Outcome contract node names must contain 1 to 200 characters");
+    }
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+      throw new Error(`Outcome contract for ${safeDisplay(nodeName)} must be an object`);
+    }
+    const allowedKeys = new Set([
+      "impact", "approvalNode", "auditNode", "failureNotificationNode",
+      "amountGuard", "counterpartyGuard", "recovery",
+    ]);
+    const unknownKey = Object.keys(value).find((key) => !allowedKeys.has(key));
+    if (unknownKey) throw new Error(`Unknown outcome contract key for ${safeDisplay(nodeName)}: ${safeDisplay(unknownKey)}`);
+    if (!["money", "customer", "privileged", "data"].includes(value.impact)) {
+      throw new Error(`Outcome contract for ${safeDisplay(nodeName)} must declare impact as money, customer, privileged, or data`);
+    }
+    for (const field of ["approvalNode", "auditNode", "failureNotificationNode"]) {
+      if (value[field] !== undefined) validateNodeReference(value[field], `${nodeName}.${field}`);
+    }
+    if (value.amountGuard !== undefined) {
+      validateNestedContract(value.amountGuard, `${nodeName}.amountGuard`, ["node", "maximum", "currency"]);
+      validateNodeReference(value.amountGuard.node, `${nodeName}.amountGuard.node`);
+      if (typeof value.amountGuard.maximum !== "number" || !Number.isFinite(value.amountGuard.maximum) || value.amountGuard.maximum <= 0) {
+        throw new Error(`Outcome contract ${safeDisplay(nodeName)}.amountGuard.maximum must be a positive finite number`);
+      }
+      if (typeof value.amountGuard.currency !== "string" || !/^[A-Z]{3}$/.test(value.amountGuard.currency)) {
+        throw new Error(`Outcome contract ${safeDisplay(nodeName)}.amountGuard.currency must be a three-letter uppercase currency code`);
+      }
+    }
+    if (value.counterpartyGuard !== undefined) {
+      validateNestedContract(value.counterpartyGuard, `${nodeName}.counterpartyGuard`, ["node", "allowed"]);
+      validateNodeReference(value.counterpartyGuard.node, `${nodeName}.counterpartyGuard.node`);
+      if (!Array.isArray(value.counterpartyGuard.allowed)
+        || !value.counterpartyGuard.allowed.length
+        || value.counterpartyGuard.allowed.length > 100
+        || value.counterpartyGuard.allowed.some((item) => typeof item !== "string" || !item.trim() || item.length > 100)) {
+        throw new Error(`Outcome contract ${safeDisplay(nodeName)}.counterpartyGuard.allowed must contain 1 to 100 non-empty strings`);
+      }
+    }
+    if (value.recovery !== undefined) {
+      validateNestedContract(value.recovery, `${nodeName}.recovery`, ["strategy", "node"]);
+      validateNodeReference(value.recovery.node, `${nodeName}.recovery.node`);
+      if (!["compensate", "rollback", "replay"].includes(value.recovery.strategy)) {
+        throw new Error(`Outcome contract ${safeDisplay(nodeName)}.recovery.strategy must be compensate, rollback, or replay`);
+      }
+    }
+    normalizedEntries.push([nodeName, structuredClone(value)]);
+  }
+  return Object.fromEntries(normalizedEntries);
+}
+
+function validateNestedContract(value, pathName, allowedKeys) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error(`Outcome contract ${safeDisplay(pathName)} must be an object`);
+  }
+  const unknownKey = Object.keys(value).find((key) => !allowedKeys.includes(key));
+  if (unknownKey) throw new Error(`Unknown outcome contract key ${safeDisplay(pathName)}.${safeDisplay(unknownKey)}`);
+}
+
+function validateNodeReference(value, pathName) {
+  if (typeof value !== "string" || !value.trim() || value.length > 200) {
+    throw new Error(`Outcome contract ${safeDisplay(pathName)} must be a non-empty node name of at most 200 characters`);
+  }
 }
 
 async function collectWorkflowFiles(inputs) {
@@ -697,6 +860,237 @@ function hasConnectedErrorPath(node, connections) {
     && output.some((connection) => reachesTerminalWithout(connection.node, node.name, connections)));
 }
 
+function inspectOutcomeContracts({
+  nodes,
+  nodesByName,
+  config,
+  adjacency,
+  connections,
+  entryNames,
+  allReachable,
+  idempotencyNames,
+  failureNotificationNames,
+  add,
+}) {
+  const contracts = config.outcomeContracts ?? {};
+  const evidenceNodeNames = new Set(Object.values(contracts).flatMap((contract) => [
+    contract.auditNode,
+    contract.failureNotificationNode,
+    contract.recovery?.node,
+  ]).filter(Boolean));
+  const inspected = new Set();
+
+  for (const node of nodes) {
+    const contract = contracts[node.name];
+    const impact = contract?.impact ?? (evidenceNodeNames.has(node.name) ? null : classifyOutcome(node, config.terms));
+    if (!impact) continue;
+    inspected.add(node.name);
+    const ruleId = ["money", "privileged"].includes(impact) ? "VF010" : "VF011";
+    if (!contract) {
+      add(ruleId, `Detected ${impact} outcome has no outcomeContracts entry`, node);
+      add("VF013", `Detected ${impact} outcome has no declared recovery strategy`, node);
+      continue;
+    }
+
+    const issues = [];
+    const recoveryIssues = [];
+    const auditNode = nodesByName.get(contract.auditNode);
+    if (!auditNode) {
+      issues.push("missing auditNode reference");
+    } else if (!isDurableAuditNode(auditNode, config.terms.audit)) {
+      issues.push(`auditNode ${contract.auditNode} is not recognized as a durable audit write`);
+    } else if (!dominatesTarget(contract.auditNode, node.name, adjacency, entryNames, allReachable)) {
+      issues.push(`auditNode ${contract.auditNode} does not guard every entry path to the action`);
+    } else if (errorBranchCanReach(contract.auditNode, new Set([node.name]), connections, adjacency)) {
+      issues.push(`auditNode ${contract.auditNode} can reach the action after an audit failure`);
+    }
+
+    const notificationNode = nodesByName.get(contract.failureNotificationNode);
+    if (!notificationNode || contract.failureNotificationNode === node.name) {
+      issues.push("missing failureNotificationNode reference");
+    } else if (!failureNotificationNames.has(contract.failureNotificationNode)) {
+      issues.push(`failureNotificationNode ${contract.failureNotificationNode} is not recognized as an operator alert`);
+    } else if (!errorBranchCanReach(node.name, new Set([contract.failureNotificationNode]), connections, adjacency)) {
+      issues.push(`failureNotificationNode ${contract.failureNotificationNode} is not reachable from the action error output`);
+    }
+
+    if (!hasProtectedIdempotencyPath(node.name, entryNames, idempotencyNames, adjacency, connections)) {
+      issues.push("an entry path reaches the action without an atomic idempotency claim");
+    }
+
+    if (["money", "privileged"].includes(impact)) {
+      const approvalNode = nodesByName.get(contract.approvalNode);
+      if (!approvalNode) {
+        issues.push("missing approvalNode reference");
+      } else if (!isStructuralGuard(approvalNode, node.name, adjacency, connections, entryNames, allReachable)
+        || !lowerType(approvalNode).endsWith(".if")
+        || !hasPositiveDynamicBooleanCondition(approvalNode.parameters ?? {}, config.terms.approval)) {
+        issues.push(`approvalNode ${contract.approvalNode} is not a dominating approval gate with a deny branch`);
+      }
+    }
+
+    if (impact === "money") {
+      const amountNode = nodesByName.get(contract.amountGuard?.node);
+      if (!amountNode) {
+        issues.push("missing amountGuard node reference");
+      } else if (!isStructuralGuard(amountNode, node.name, adjacency, connections, entryNames, allReachable)
+        || !hasDynamicUpperBound(amountNode.parameters ?? {}, contract.amountGuard.maximum)
+        || !nodeContainsExactValue(amountNode.parameters ?? {}, contract.amountGuard.currency)) {
+        issues.push(`amountGuard ${contract.amountGuard.node} does not structurally enforce the declared maximum and currency`);
+      }
+
+      const counterpartyNode = nodesByName.get(contract.counterpartyGuard?.node);
+      if (!counterpartyNode) {
+        issues.push("missing counterpartyGuard node reference");
+      } else if (!isStructuralGuard(counterpartyNode, node.name, adjacency, connections, entryNames, allReachable)
+        || !valueContainsDirectDynamicReference(counterpartyNode.parameters ?? {})
+        || !contract.counterpartyGuard.allowed.every((value) => nodeContainsExactValue(counterpartyNode.parameters ?? {}, value))) {
+        issues.push(`counterpartyGuard ${contract.counterpartyGuard.node} does not structurally enforce every allowed counterparty`);
+      }
+    }
+
+    const recoveryNode = nodesByName.get(contract.recovery?.node);
+    if (!recoveryNode || contract.recovery?.node === node.name) {
+      recoveryIssues.push("missing recovery node reference");
+    } else if (!nodeContainsTerms(recoveryNode, config.terms.recovery)) {
+      recoveryIssues.push(`recovery node ${contract.recovery.node} is not recognized as compensation, rollback, or replay logic`);
+    } else if (["compensate", "rollback"].includes(contract.recovery.strategy)
+      && !traverseGraph(adjacency, [node.name]).has(contract.recovery.node)) {
+      recoveryIssues.push(`${contract.recovery.strategy} node ${contract.recovery.node} is not downstream from the action`);
+    }
+
+    if (issues.length) add(ruleId, `Outcome contract is incomplete: ${issues.join("; ")}`, node);
+    if (recoveryIssues.length) add("VF013", `Recovery contract is incomplete: ${recoveryIssues.join("; ")}`, node);
+  }
+
+  for (const [nodeName, contract] of Object.entries(contracts)) {
+    if (inspected.has(nodeName) || nodesByName.has(nodeName)) continue;
+    const ruleId = ["money", "privileged"].includes(contract.impact) ? "VF010" : "VF011";
+    add(ruleId, `Outcome contract references missing action node: ${nodeName}`);
+  }
+}
+
+function classifyOutcome(node, terms) {
+  if (!isOutcomeAction(node)) return null;
+  if (nodeContainsTerms(node, terms.outcomeMoney)) return "money";
+  if (nodeContainsTerms(node, terms.outcomePrivileged)) return "privileged";
+  if (isDestructiveDataAction(node) || nodeContainsTerms(node, terms.outcomeData)) return "data";
+  if (isCommunicationNode(node) && nodeContainsTerms(node, terms.outcomeCustomer)) return "customer";
+  return null;
+}
+
+function isCommunicationNode(node) {
+  return COMMUNICATION_SUFFIXES.some((suffix) => lowerType(node).endsWith(suffix));
+}
+
+function isOutcomeAction(node) {
+  if (!isSideEffect(node)) return false;
+  if (!lowerType(node).endsWith(".httprequest")) return true;
+  return ["POST", "PUT", "PATCH", "DELETE"].includes(String(node.parameters?.method ?? "GET").toUpperCase());
+}
+
+function isDestructiveDataAction(node) {
+  if (!DURABLE_AUDIT_SUFFIXES.some((suffix) => lowerType(node).endsWith(suffix))) return false;
+  const operation = String(node.parameters?.operation ?? node.parameters?.resourceOperation ?? "").toLowerCase();
+  if (["delete", "remove", "truncate", "drop"].includes(operation)) return true;
+  return nodeContainsSqlStatement(node.parameters ?? {}, /^\s*(?:delete\s+from|drop\s+(?:table|schema|database)|truncate\b)/i);
+}
+
+function isFailureNotification(node, terms) {
+  if (!isCommunicationNode(node) || !nodeContainsTerms(node, terms)) return false;
+  if (!lowerType(node).endsWith(".httprequest")) return true;
+  return ["POST", "PUT", "PATCH"].includes(String(node.parameters?.method ?? "GET").toUpperCase());
+}
+
+function errorBranchCanReach(nodeName, targetNames, connections, adjacency) {
+  const branches = connections[nodeName]?.main;
+  if (!Array.isArray(branches)) return false;
+  const starts = branches.slice(1).flatMap((branch) => (branch ?? []))
+    .filter((connection) => connection.type === "main")
+    .map((connection) => connection.node);
+  if (!starts.length) return false;
+  const reachable = traverseGraph(adjacency, starts);
+  return [...targetNames].some((target) => reachable.has(target));
+}
+
+function isDurableAuditNode(node, terms) {
+  if (!DURABLE_AUDIT_SUFFIXES.some((suffix) => lowerType(node).endsWith(suffix))
+    || !nodeContainsTerms(node, terms)
+    || node.continueOnFail === true
+    || node.onError === "continueRegularOutput") return false;
+  const operation = String(node.parameters?.operation ?? node.parameters?.resourceOperation ?? "").toLowerCase();
+  if (["create", "update", "append", "insert", "upsert", "add", "put"].includes(operation)) return true;
+  if (operation && operation !== "executequery") return false;
+  return nodeContainsSqlStatement(node.parameters ?? {}, /^\s*(?:insert|update|merge)\b/i);
+}
+
+function dominatesTarget(blockerName, targetName, adjacency, entryNames, allReachable) {
+  if (blockerName === targetName || !allReachable.has(targetName)) return false;
+  return !traverseGraph(adjacency, entryNames, new Set([blockerName])).has(targetName);
+}
+
+function isStructuralGuard(node, targetName, adjacency, connections, entryNames, allReachable) {
+  if (![".if", ".switch"].some((suffix) => lowerType(node).endsWith(suffix))) return false;
+  if (!dominatesTarget(node.name, targetName, adjacency, entryNames, allReachable)) return false;
+  const branches = connections[node.name]?.main;
+  if (!Array.isArray(branches) || branches.length < 2) return false;
+  const reachesTarget = branches.map((branch) => {
+    const starts = (branch ?? []).filter((connection) => connection.type === "main").map((connection) => connection.node);
+    return starts.length > 0 && traverseGraph(adjacency, starts).has(targetName);
+  });
+  return reachesTarget.some(Boolean) && reachesTarget.some((value) => !value);
+}
+
+function nodeContainsExactValue(input, expected) {
+  const normalizedExpected = typeof expected === "string" ? expected.trim().toLowerCase() : expected;
+  const stack = [input];
+  while (stack.length) {
+    const value = stack.pop();
+    if (typeof value === "string" && typeof normalizedExpected === "string" && value.trim().toLowerCase() === normalizedExpected) return true;
+    if (typeof value === "number" && typeof normalizedExpected === "number" && value === normalizedExpected) return true;
+    if (Array.isArray(value)) {
+      for (const child of value) stack.push(child);
+    } else if (value && typeof value === "object") {
+      for (const child of Object.values(value)) stack.push(child);
+    }
+  }
+  return false;
+}
+
+function hasDynamicUpperBound(input, maximum) {
+  const stack = [input];
+  const allowedOperations = new Set(["smaller", "smallerequal", "lessthan", "lessthanorequal", "lte"]);
+  while (stack.length) {
+    const value = stack.pop();
+    if (Array.isArray(value)) {
+      for (const child of value) stack.push(child);
+      continue;
+    }
+    if (!value || typeof value !== "object") continue;
+    const values = Object.values(value);
+    const operation = String(value.operation ?? "").toLowerCase().replace(/[^a-z]/g, "");
+    if (allowedOperations.has(operation)
+      && values.some((child) => typeof child === "string" && isDirectDynamicReference(child))
+      && values.some((child) => typeof child === "number" && child === maximum)) return true;
+    for (const child of values) stack.push(child);
+  }
+  return false;
+}
+
+function valueContainsDirectDynamicReference(input) {
+  const stack = [input];
+  while (stack.length) {
+    const value = stack.pop();
+    if (typeof value === "string" && isDirectDynamicReference(value)) return true;
+    if (Array.isArray(value)) {
+      for (const child of value) stack.push(child);
+    } else if (value && typeof value === "object") {
+      for (const child of Object.values(value)) stack.push(child);
+    }
+  }
+  return false;
+}
+
 function reachesTerminalWithout(start, excluded, connections) {
   const stack = [start];
   const seen = new Set();
@@ -762,11 +1156,18 @@ function isHumanHandoff(node, terms) {
 }
 
 function isAtomicIdempotencyGuard(node, terms) {
-  if (!nodeContainsTerms(node, terms)) return false;
+  if (!nodeContainsTerms(node, terms) || node.continueOnFail === true || node.onError === "continueRegularOutput") return false;
   const type = lowerType(node);
   const parameters = node.parameters ?? {};
   return type.endsWith(".postgres")
     && nodeContainsSqlStatement(parameters, /^\s*insert\b[\s\S]*\bon\s+conflict\b[\s\S]*\bdo\s+nothing\b[\s\S]*\breturning\b/i);
+}
+
+function hasProtectedIdempotencyPath(targetName, starts, idempotencyNames, adjacency, connections) {
+  const validGuards = new Set([...idempotencyNames].filter((guardName) =>
+    !errorBranchCanReach(guardName, new Set([targetName]), connections, adjacency)));
+  if (!validGuards.size || !traverseGraph(adjacency, starts).has(targetName)) return false;
+  return !traverseGraph(adjacency, starts, validGuards).has(targetName);
 }
 
 function nodeContainsSqlStatement(value, pattern) {

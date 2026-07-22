@@ -1,0 +1,85 @@
+{
+  "name": "Safe refund with outcome contract",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "authentication": "headerAuth", "path": "refund" },
+      "credentials": { "httpHeaderAuth": { "id": "credential-reference", "name": "Webhook Header Auth" } }
+    },
+    {
+      "id": "idempotency",
+      "name": "Claim idempotency event",
+      "type": "n8n-nodes-base.postgres",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO event_ledger (event_id) VALUES ($1) ON CONFLICT (event_id) DO NOTHING RETURNING event_id"
+      }
+    },
+    {
+      "id": "audit",
+      "name": "Record refund audit",
+      "type": "n8n-nodes-base.postgres",
+      "parameters": { "operation": "insert", "table": "refund_audit" }
+    },
+    {
+      "id": "approval",
+      "name": "Approve refund",
+      "type": "n8n-nodes-base.if",
+      "parameters": { "conditions": { "boolean": [{ "value1": "={{ $json.approved }}", "value2": true }] } }
+    },
+    {
+      "id": "amount",
+      "name": "Limit refund amount",
+      "type": "n8n-nodes-base.if",
+      "parameters": {
+        "conditions": { "number": [{ "value1": "={{ $json.amount }}", "operation": "smallerEqual", "value2": 500 }] },
+        "currency": "USD"
+      }
+    },
+    {
+      "id": "counterparty",
+      "name": "Allow refund account",
+      "type": "n8n-nodes-base.switch",
+      "parameters": { "value": "={{ $json.counterparty }}", "rules": [{ "value": "merchant-primary" }] }
+    },
+    {
+      "id": "refund",
+      "name": "Issue refund",
+      "type": "n8n-nodes-base.httpRequest",
+      "onError": "continueErrorOutput",
+      "parameters": { "method": "POST", "url": "https://payments.invalid/refund" }
+    },
+    {
+      "id": "failure-alert",
+      "name": "Notify refund failure",
+      "type": "n8n-nodes-base.slack",
+      "parameters": { "channel": "operations", "text": "Notify failure for refund {{ $json.event_id }}" }
+    },
+    {
+      "id": "compensation",
+      "name": "Compensate transaction",
+      "type": "n8n-nodes-base.httpRequest",
+      "parameters": { "method": "POST", "url": "https://payments.invalid/reverse", "operation": "compensate" }
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Claim idempotency event", "type": "main", "index": 0 }]] },
+    "Claim idempotency event": { "main": [[{ "node": "Record refund audit", "type": "main", "index": 0 }]] },
+    "Record refund audit": { "main": [[{ "node": "Approve refund", "type": "main", "index": 0 }]] },
+    "Approve refund": { "main": [[{ "node": "Limit refund amount", "type": "main", "index": 0 }], []] },
+    "Limit refund amount": { "main": [[{ "node": "Allow refund account", "type": "main", "index": 0 }], []] },
+    "Allow refund account": { "main": [[{ "node": "Issue refund", "type": "main", "index": 0 }], []] },
+    "Issue refund": {
+      "main": [
+        [],
+        [
+          { "node": "Notify refund failure", "type": "main", "index": 0 },
+          { "node": "Compensate transaction", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "settings": { "executionTimeout": 120, "errorWorkflow": "global-error-handler" }
+}

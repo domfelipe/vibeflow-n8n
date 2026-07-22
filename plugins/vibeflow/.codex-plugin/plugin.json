@@ -1,6 +1,6 @@
 {
   "name": "vibeflow",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "description": "Audit and repair AI-generated n8n workflows before production",
   "author": {
     "name": "Felipe Domingues",
@@ -13,8 +13,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Vibeflow",
-    "shortDescription": "Safety checks for AI-generated n8n workflows",
-    "longDescription": "Run deterministic safety and contract checks on n8n workflow exports, explain findings, and repair blocking issues before deployment.",
+    "shortDescription": "Preflight checks for real-world n8n outcomes",
+    "longDescription": "Run deterministic safety and outcome-contract checks on n8n workflow exports, explain findings, and repair blocking issues before deployment.",
     "developerName": "Felipe Domingues",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],

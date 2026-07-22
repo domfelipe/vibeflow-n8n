@@ -1,0 +1,29 @@
+{
+  "name": "Unsafe refund without outcome contract",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Public refund webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "authentication": "none", "path": "refund" }
+    },
+    {
+      "id": "refund",
+      "name": "Issue refund",
+      "type": "n8n-nodes-base.httpRequest",
+      "onError": "continueErrorOutput",
+      "parameters": { "method": "POST", "url": "https://payments.invalid/refund" }
+    },
+    {
+      "id": "swallow",
+      "name": "Swallow refund failure",
+      "type": "n8n-nodes-base.noOp",
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Public refund webhook": { "main": [[{ "node": "Issue refund", "type": "main", "index": 0 }]] },
+    "Issue refund": { "main": [[], [{ "node": "Swallow refund failure", "type": "main", "index": 0 }]] }
+  },
+  "settings": {}
+}

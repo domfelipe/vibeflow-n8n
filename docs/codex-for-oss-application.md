@@ -12,7 +12,7 @@ Prepared: 2026-07-22
 
 Submit in **English**, even through the PT-BR form. OpenAI publishes no language requirement and no evidence that language changes selection odds. English is recommended only to reduce translation friction for a global technical review.
 
-Submit now. Stars, forks, downloads, repository usage, ecosystem importance, and active maintenance are evaluation signals, not published minimum thresholds. Vibeflow's strongest evidence is its Codex-native engineering and its first real 92-node audit, not early popularity metrics.
+Submit immediately after the v0.9.0 release on 2026-07-24. Do not wait for arbitrary star, fork, or PR targets. Vibeflow's strongest evidence is its Codex-native engineering, first real 92-node audit, and a public maintenance loop that turned community feedback into tested policy features.
 
 ## Copy-and-paste form
 
@@ -42,9 +42,9 @@ Select: **Principal maintainer**.
 
 ### Why is this repository eligible?
 
-Character count: **420/500**.
+Recount before submission; keep under 500 characters.
 
-> Vibeflow is an MIT-licensed safety and contract gate for AI-generated n8n workflows, rebuilt end-to-end with Codex. Its v0.8.0 plugin audited a real 92-node workflow in read-only mode and produced provenance-backed results: 3 blocking AI-safety findings, 57 prioritized warnings, and concrete revalidation gates. It fills a growing n8n need: deterministic pre-production checks for workflows created by people or agents.
+> Vibeflow is an MIT-licensed safety gate for AI-generated n8n workflows, rebuilt end-to-end with Codex. It audited a real 92-node workflow in read-only mode, finding 3 blocking risks and 57 warnings. Community feedback then shaped v0.9: outcome-aware checks for refunds, customer actions, silent failures, audit, idempotency, approval, limits, and recovery.
 
 ### Interests
 
@@ -67,9 +67,9 @@ Character count: **390/500**.
 
 ### Anything else we should know?
 
-Character count: **431/500**.
+Recount before submission; keep under 500 characters.
 
-> Vibeflow is a public case study in Codex-native OSS development. Codex helped reposition an old prototype, implement the CLI, run repeated Red Team reviews, fix regressions, package a GitHub Action and Codex plugin, open and merge PRs, and publish v0.8.0. Its first production-scale audit exposed workflow risks and analyzer limitations, creating a concrete maintenance backlog. Adoption is early; the engineering evidence is real.
+> Vibeflow is a public case study in Codex-native OSS development. Codex drove the project from product repositioning through implementation, adversarial review, remediation, CI, plugin packaging, releases, a real-workflow audit, and the v0.9 response to user feedback. Adoption is early, but the engineering, maintenance history, and real-world evidence are public and reproducible.
 
 ## PT-BR review translation
 
@@ -77,7 +77,7 @@ These translations are for review only. Paste the English versions above into th
 
 ### Repository eligibility
 
-> Vibeflow é um gate MIT de segurança e contratos para workflows n8n gerados por IA, reconstruído de ponta a ponta com Codex. O plugin v0.8.0 auditou em modo somente leitura um workflow real de 92 nós e produziu resultados com proveniência: 3 bloqueios de segurança de IA, 57 avisos priorizados e gates concretos de revalidação. Ele atende a uma necessidade crescente do ecossistema n8n: checks determinísticos antes da produção para workflows criados por pessoas ou agentes.
+> Vibeflow é um gate MIT de segurança para workflows n8n gerados por IA, reconstruído de ponta a ponta com Codex. Ele auditou em modo somente leitura um workflow real de 92 nós, encontrando 3 riscos bloqueantes e 57 avisos. O feedback da comunidade então moldou a v0.9: checks de resultados reais para reembolsos, ações com clientes, falhas silenciosas, auditoria, idempotência, aprovação, limites e recuperação.
 
 ### API-credit use
 
@@ -85,14 +85,14 @@ These translations are for review only. Paste the English versions above into th
 
 ### Additional context
 
-> Vibeflow é um estudo de caso público de desenvolvimento open source nativo em Codex. O Codex ajudou a reposicionar um protótipo antigo, implementar a CLI, executar Red Teams repetidos, corrigir regressões, empacotar uma GitHub Action e um plugin Codex, mesclar PRs e publicar a v0.8.0. A primeira auditoria em escala de produção revelou riscos do workflow e limitações do analisador, criando um backlog concreto. A adoção ainda é inicial; a evidência de engenharia é real.
+> Vibeflow é um estudo de caso público de desenvolvimento open source nativo em Codex. O Codex conduziu o projeto desde o reposicionamento e implementação até revisão adversarial, correções, CI, plugin, releases, auditoria de workflow real e a resposta da v0.9 ao feedback de usuários. A adoção ainda é inicial, mas a engenharia, o histórico de manutenção e a evidência real são públicos e reproduzíveis.
 
 ## Evidence map
 
 Use these links only if OpenAI requests verification; the form has no dedicated evidence field.
 
 - Public MIT repository: <https://github.com/domfelipe/vibeflow-n8n>
-- Executable release: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.8.0>
+- Executable release after Friday launch: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.9.0>
 - Reproducible demo: <https://github.com/domfelipe/vibeflow-n8n/blob/main/docs/demo.md>
 - Release and Red Team audit: <https://github.com/domfelipe/vibeflow-n8n/blob/main/docs/release-audit.md>
 - CI history: <https://github.com/domfelipe/vibeflow-n8n/actions/workflows/ci.yml>
@@ -101,16 +101,16 @@ Use these links only if OpenAI requests verification; the form has no dedicated 
 
 ## Evidence snapshot
 
-Captured on 2026-07-22:
+Refresh this section on 2026-07-24 immediately before submission. Current candidate evidence:
 
 - public repository with MIT license;
-- `v0.8.0` release;
-- 26 adversarial tests on Node.js 20, 22, and 24;
+- `v0.9.0` release candidate, with v0.8.0 already public;
+- 36 local adversarial tests; remote Node.js 20, 22, and 24 CI remains a release gate;
 - dependency-free CLI, GitHub Action, and installable Codex plugin;
-- 3 maintainer PRs merged with green CI;
+- 3 prior maintainer PRs merged with green CI; add the v0.9 PR after merge;
 - 2 stars, 0 forks, and no verified external contributor yet;
 - first real audit: anonymized 92-node workflow, 3 blocking findings, 57 warnings, no workflow mutation;
-- Codex used across product repositioning, implementation, review, Red Team, remediation, packaging, CI, release, and real-workflow audit.
+- Codex used across product repositioning, implementation, review, Red Team, remediation, packaging, CI, release, real-workflow audit, and the community-feedback-driven v0.9 cycle.
 
 Do not describe maintainer PRs, the maintainer's own workflow, clones, or unattributed stars as external adoption.
 
@@ -144,7 +144,7 @@ The approved public description is: **“a real, production-scale 92-node conver
 
 Continue collecting organic evidence without delaying the application:
 
-1. publish the r/n8n post;
+1. publish the v0.9 follow-up in r/n8n;
 2. invite users to report anonymized false positives and missed unsafe cases;
 3. respond to every issue or discussion with reproducible evidence;
 4. keep releases, CI, and the public maintenance trail current;

@@ -18,7 +18,11 @@
         "VF006": { "$ref": "#/$defs/severity" },
         "VF007": { "$ref": "#/$defs/severity" },
         "VF008": { "$ref": "#/$defs/severity" },
-        "VF009": { "$ref": "#/$defs/severity" }
+        "VF009": { "$ref": "#/$defs/severity" },
+        "VF010": { "$ref": "#/$defs/severity" },
+        "VF011": { "$ref": "#/$defs/severity" },
+        "VF012": { "$ref": "#/$defs/severity" },
+        "VF013": { "$ref": "#/$defs/severity" }
       }
     },
     "terms": {
@@ -27,7 +31,15 @@
       "properties": {
         "killSwitch": { "$ref": "#/$defs/terms" },
         "humanHandoff": { "$ref": "#/$defs/terms" },
-        "idempotency": { "$ref": "#/$defs/terms" }
+        "idempotency": { "$ref": "#/$defs/terms" },
+        "approval": { "$ref": "#/$defs/terms" },
+        "audit": { "$ref": "#/$defs/terms" },
+        "failureNotification": { "$ref": "#/$defs/terms" },
+        "outcomeMoney": { "$ref": "#/$defs/terms" },
+        "outcomeCustomer": { "$ref": "#/$defs/terms" },
+        "outcomePrivileged": { "$ref": "#/$defs/terms" },
+        "outcomeData": { "$ref": "#/$defs/terms" },
+        "recovery": { "$ref": "#/$defs/terms" }
       }
     },
     "bannedNodeTypes": {
@@ -35,6 +47,13 @@
       "items": { "type": "string", "minLength": 1, "maxLength": 200 },
       "maxItems": 1000,
       "uniqueItems": true
+    },
+    "outcomeContracts": {
+      "type": "object",
+      "description": "Static policy evidence keyed by the exact high-impact action node name.",
+      "maxProperties": 1000,
+      "propertyNames": { "minLength": 1, "maxLength": 200 },
+      "additionalProperties": { "$ref": "#/$defs/outcomeContract" }
     }
   },
   "$defs": {
@@ -45,6 +64,52 @@
       "minItems": 1,
       "maxItems": 100,
       "uniqueItems": true
+    },
+    "nodeReference": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "outcomeContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact"],
+      "properties": {
+        "impact": { "enum": ["money", "customer", "privileged", "data"] },
+        "approvalNode": { "$ref": "#/$defs/nodeReference" },
+        "auditNode": { "$ref": "#/$defs/nodeReference" },
+        "failureNotificationNode": { "$ref": "#/$defs/nodeReference" },
+        "amountGuard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node", "maximum", "currency"],
+          "properties": {
+            "node": { "$ref": "#/$defs/nodeReference" },
+            "maximum": { "type": "number", "exclusiveMinimum": 0 },
+            "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+          }
+        },
+        "counterpartyGuard": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["node", "allowed"],
+          "properties": {
+            "node": { "$ref": "#/$defs/nodeReference" },
+            "allowed": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 100,
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1, "maxLength": 100 }
+            }
+          }
+        },
+        "recovery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["strategy", "node"],
+          "properties": {
+            "strategy": { "enum": ["compensate", "rollback", "replay"] },
+            "node": { "$ref": "#/$defs/nodeReference" }
+          }
+        }
+      }
     }
   }
 }
