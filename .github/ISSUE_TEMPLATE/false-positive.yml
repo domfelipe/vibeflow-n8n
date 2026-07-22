@@ -1,0 +1,23 @@
+name: False positive
+description: Report a policy finding that should not fire
+title: "false-positive: "
+labels: [false-positive]
+body:
+  - type: input
+    attributes:
+      label: Rule ID
+      placeholder: VF006
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Anonymized workflow fragment
+      description: Include relevant nodes and connections without secrets or customer data.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why the workflow is safe
+    validations:
+      required: true

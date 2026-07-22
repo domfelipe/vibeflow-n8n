@@ -1,44 +1,15 @@
-# Security Policy
+# Security policy
+
+## Reporting
+
+Use GitHub private vulnerability reporting for this repository. Do not open a public issue containing exploit details, credentials, or customer workflow data.
+
+## Supported versions
+
+Security fixes target the latest tagged release.
 
 ## Scope
 
-This repository contains prompts, conventions, examples, and packaging guidance for agent-driven workflow creation in n8n.
+Vibeflow reads local JSON and optionally writes a caller-selected report. It does not contact n8n, execute workflows, collect telemetry, or upload workflow content.
 
-It does not store production secrets by design.
-
-## Reporting a vulnerability
-
-If you discover a security issue related to:
-- secret handling guidance,
-- destructive workflow defaults,
-- unsafe recipe recommendations,
-- risky prompt behavior,
-
-please report it privately before opening a public issue.
-
-Use a private contact method for the maintainer when available.
-
-## Security expectations for contributors
-
-Contributors should avoid introducing guidance that:
-- assumes access to credentials that may not exist,
-- performs destructive actions without explicit user intent,
-- sends external communications without confirmation,
-- hides compliance-sensitive assumptions,
-- suggests storing plaintext secrets in repo files.
-
-## Safe defaults
-
-The skill should prefer:
-- placeholders over fake credentials,
-- explicit assumptions over silent guesses,
-- confirmation for destructive or externally visible actions,
-- human-readable reports for manual review.
-
-## Out of scope
-
-This repository does not guarantee:
-- security of any third-party MCP server,
-- security of any n8n deployment,
-- security of a user's local machine,
-- correctness of external vendor SDKs or CLIs.
+The secret rule is a defensive heuristic, not a replacement for repository secret scanning. A clean report is not proof of runtime security.

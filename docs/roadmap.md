@@ -1,34 +1,21 @@
 # Roadmap
 
-## Current state: v0.6.0
+## 0.8.0
 
-V6 is designed to be showcase-ready:
-- launch and community docs are in place
-- client snippets are documented
-- normalized plan schema exists
-- demo-oriented recipes are stronger
-- placeholder visual assets are included for the first public version
+Ship the executable reset: CLI, nine configurable policies, fixtures, tests, SARIF, GitHub Action, and Codex plugin.
 
-## v0.7.0 ideas
+## Next release gate
 
-- sample workflow exports for safe local testing
-- richer setup fixtures by client
-- validation helper scripts for plan payloads
-- GIFs and screenshots from real runs
-- recipe packs for sales, support, finance, and internal ops
+Do not add another integration by default. Prioritize evidence from real workflows:
 
-## v0.8.0 ideas
+1. Measure false positives by rule.
+2. Accept anonymized fixtures from external users.
+3. Add a node type or policy only with a failing fixture.
+4. Improve GitHub annotations if SARIF users request it.
+5. Package for npm only when GitHub installation creates material friction.
+6. Add node-specific handoff and side-effect adapters only with adversarial safe/unsafe fixtures.
+7. Model additional atomic idempotency gates only when their duplicate path is proven to stop downstream items.
 
-- optional plan linter
-- workflow quality checklist by recipe type
-- starter gallery page for examples
-- benchmark prompts for comparing clients
+## Explicitly deferred
 
-## Long-term direction
-
-Turn Vibeflow n8n into a portable skill pack that:
-- speaks natural language with minimal friction
-- plans before building
-- works across multiple MCP-capable coding agents
-- remains understandable to non-experts
-- feels demo-friendly from the first clone
+Hosted UI, custom MCP server, live n8n mutation, workflow generation, and broad multi-agent wrappers.

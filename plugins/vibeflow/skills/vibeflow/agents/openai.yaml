@@ -1,0 +1,4 @@
+interface:
+  display_name: "Vibeflow"
+  short_description: "Safety checks for AI-generated n8n workflows"
+  default_prompt: "Use $vibeflow to audit this n8n workflow and fix blocking findings."

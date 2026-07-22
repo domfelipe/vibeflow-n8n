@@ -1,0 +1,28 @@
+{
+  "name": "vibeflow",
+  "version": "0.8.0",
+  "description": "Audit and repair AI-generated n8n workflows before production",
+  "author": {
+    "name": "Felipe Domingues",
+    "url": "https://github.com/domfelipe"
+  },
+  "homepage": "https://github.com/domfelipe/vibeflow-n8n",
+  "repository": "https://github.com/domfelipe/vibeflow-n8n",
+  "license": "MIT",
+  "keywords": ["n8n", "workflow", "security", "quality", "ai-agents"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Vibeflow",
+    "shortDescription": "Safety checks for AI-generated n8n workflows",
+    "longDescription": "Run deterministic safety and contract checks on n8n workflow exports, explain findings, and repair blocking issues before deployment.",
+    "developerName": "Felipe Domingues",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/domfelipe/vibeflow-n8n",
+    "defaultPrompt": [
+      "Audit this n8n workflow before production.",
+      "Fix the blocking Vibeflow findings.",
+      "Explain the safety risks in this workflow."
+    ]
+  }
+}
