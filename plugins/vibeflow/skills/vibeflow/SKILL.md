@@ -1,6 +1,6 @@
 ---
 name: vibeflow
-description: Audit and repair exported n8n workflow JSON with deterministic safety and contract checks. Use when reviewing AI-generated or customer-facing n8n workflows before deployment, investigating Vibeflow VF000-VF009 findings, adding kill switches or human handoffs, checking secrets, retries, and webhook exposure, or preparing workflow changes for CI and pull requests.
+description: Audit and repair exported n8n workflow JSON with deterministic safety and outcome-contract checks. Use when reviewing AI-generated or customer-facing n8n workflows before deployment, investigating Vibeflow VF000-VF013 findings, adding kill switches or human handoffs, checking secrets, retries, webhook exposure, money or customer side effects, recovery paths, or preparing workflow changes for CI and pull requests.
 ---
 
 # Vibeflow
@@ -19,7 +19,7 @@ Use the CLI as the source of truth. Do not infer that a workflow is safe from it
    For a released version without a checkout:
 
    ```bash
-   npx --yes github:domfelipe/vibeflow-n8n#4998605ed7dc12b9b867d69d7005d25778c7e109 check path/to/workflow.json
+   npx --yes github:domfelipe/vibeflow-n8n#v0.9.0 check path/to/workflow.json
    ```
 
 3. Read [references/policies.md](references/policies.md) when interpreting or repairing a finding.
@@ -32,6 +32,8 @@ Use the CLI as the source of truth. Do not infer that a workflow is safe from it
 - Never copy literal credentials into a workflow to silence `VF001`.
 - Never disable `VF006` for customer-facing agents without explicit user approval; an off switch must block inference and all AI responses.
 - Treat static analysis as a preflight, not proof of runtime correctness.
+- Treat `VF010` and `VF011` as outcome risks, even when the underlying node type is ordinary HTTP, database, or messaging.
+- Do not claim an outcome contract enforces runtime authorization, limits, audit durability, or recovery; verify those separately in the executing system.
 - Prefer fixing a shared upstream node over duplicating guards across branches.
 - Keep fixes local to the exported workflow until the user authorizes deployment.
 

@@ -65,6 +65,13 @@
       "parameters": {}
     },
     {
+      "id": "failure-alert",
+      "name": "Operator error alert",
+      "type": "n8n-nodes-base.slack",
+      "onError": "continueErrorOutput",
+      "parameters": { "channel": "operations", "text": "Failure alert: {{ $json.error.message }}" }
+    },
+    {
       "id": "response",
       "name": "Respond to Webhook",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -76,7 +83,7 @@
     "Claim idempotency event": {
       "main": [
         [{ "node": "Agent enabled kill switch", "type": "main", "index": 0 }],
-        [{ "node": "Ledger failure stop", "type": "main", "index": 0 }]
+        [{ "node": "Operator error alert", "type": "main", "index": 0 }]
       ]
     },
     "Agent enabled kill switch": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }], []] },
@@ -89,6 +96,12 @@
       ]
     },
     "Human handoff ticket": {
+      "main": [
+        [],
+        [{ "node": "Operator error alert", "type": "main", "index": 0 }]
+      ]
+    },
+    "Operator error alert": {
       "main": [
         [],
         [{ "node": "Handoff failure stop", "type": "main", "index": 0 }]

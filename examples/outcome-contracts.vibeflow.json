@@ -1,0 +1,14 @@
+{
+  "$schema": "../schemas/vibeflow-config.schema.json",
+  "outcomeContracts": {
+    "Issue refund": {
+      "impact": "money",
+      "approvalNode": "Approve refund",
+      "auditNode": "Record refund audit",
+      "failureNotificationNode": "Notify refund failure",
+      "amountGuard": { "node": "Limit refund amount", "maximum": 500, "currency": "USD" },
+      "counterpartyGuard": { "node": "Allow refund account", "allowed": ["merchant-primary"] },
+      "recovery": { "strategy": "compensate", "node": "Compensate transaction" }
+    }
+  }
+}

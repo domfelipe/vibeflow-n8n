@@ -9,6 +9,10 @@
     "VF006": "error",
     "VF007": "warning",
     "VF008": "warning",
-    "VF009": "warning"
+    "VF009": "warning",
+    "VF010": "error",
+    "VF011": "warning",
+    "VF012": "warning",
+    "VF013": "warning"
   }
 }

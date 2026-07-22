@@ -24,6 +24,18 @@ Rules have a stable ID, default severity, description, and remediation. Trusted 
 
 Graph policies use the validated n8n `main` connection shape, not node order; AI resource wiring is not control flow. VF005 requires a high-confidence atomic ledger gate that emits no item for duplicate claims and dominates inbound paths to side effects. VF006 rejects any AI entry path that bypasses a positive IF check against a direct agent-status reference. VF007 requires a reachable external handoff action.
 
+VF010-VF013 introduce outcome contracts. High-confidence classification inspects a side-effect node's name, type, operation, URL, and parameters for money, customer communication, privileged access, and destructive-data semantics. Explicit `outcomeContracts` cover domain actions the built-in vocabulary does not recognize.
+
+For a contracted action, the analyzer verifies graph evidence rather than labels alone:
+
+- an atomic idempotency claim dominates the action;
+- durable audit storage dominates the action;
+- approval, amount, and counterparty guards are IF/Switch nodes with both an allowed route and a route that cannot reach the action;
+- the declared failure notification is reachable from the action's error output;
+- compensation and rollback nodes are downstream from the action; replay nodes must exist and carry recovery semantics.
+
+Money and privileged outcomes default to blocking VF010. Customer communications and destructive writes default to advisory VF011. Missing recovery and silent error paths are separate findings so teams can triage them independently.
+
 `--locked` rejects configuration that weakens built-in severity, changes safety vocabulary, or removes a default banned node. The GitHub Action always enables locked mode so a pull request cannot silence its own findings by editing `.vibeflow.json`.
 
 ## Trust boundaries
@@ -35,6 +47,8 @@ Output paths are selected by the caller. The GitHub Action passes inputs as quot
 ## Known limitations
 
 - Static structure cannot prove that a condition, SQL claim, or handoff works at runtime.
+- Outcome contracts cannot prove caller authorization, amount calculation, counterparty identity, audit durability, or successful compensation at runtime.
+- Automatic outcome classification is intentionally conservative and can miss domain-specific actions; declare them explicitly in configuration.
 - Secret detection can miss unusual key names and can produce false positives.
 - Community nodes unknown to the side-effect catalog need explicit policy additions.
 - Locked mode protects policy content, but repository owners must still review changes to the CI workflow itself.

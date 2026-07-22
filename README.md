@@ -7,14 +7,14 @@
 
 Vibeflow answers one question before deployment: **does this workflow deserve to reach production?**
 
-It inspects exported n8n JSON for embedded secrets, dangerous nodes, exposed webhooks, missing failure paths, absent idempotency, unsafe AI paths, unbounded execution, and risky retries.
+It inspects exported n8n JSON for embedded secrets, dangerous nodes, exposed webhooks, missing failure paths, absent idempotency, unsafe AI paths, unbounded execution, risky retries, and unguarded real-world outcomes such as refunds, customer messages, privileged actions, and destructive writes.
 
 Vibeflow is not another workflow builder or MCP server. It is a deterministic quality gate for workflows built by people or agents.
 
 ## Quick start
 
 ```bash
-npx --yes github:domfelipe/vibeflow-n8n#4998605ed7dc12b9b867d69d7005d25778c7e109 check workflow.json
+npx --yes github:domfelipe/vibeflow-n8n#v0.9.0 check workflow.json
 ```
 
 Or from a checkout:
@@ -55,8 +55,43 @@ node bin/vibeflow.mjs check examples/unsafe-support-agent.workflow.json --fail-o
 | VF007 | warning | AI paths without a reachable external human handoff |
 | VF008 | warning | Workflows without a 1-3600 second execution timeout |
 | VF009 | warning | Retries without idempotency, bounds, or backoff |
+| VF010 | error | Money or privileged actions without a verified outcome contract |
+| VF011 | warning | Customer communications or destructive writes without an outcome contract |
+| VF012 | warning | Connected error paths that terminate without operator notification |
+| VF013 | warning | High-impact writes without compensation, rollback, or replay evidence |
 
 Static analysis cannot prove runtime correctness. Configure severity and domain vocabulary in `.vibeflow.json`; document every waiver.
+
+## Outcome contracts
+
+Vibeflow v0.9 separates a dangerous node from a dangerous outcome. A normal HTTP node can issue a refund, notify a customer, or change access. High-confidence cases are detected from the action's name, type, operation, URL, and parameters. Teams can classify other actions explicitly.
+
+Contracts are keyed by the exact action node name:
+
+```json
+{
+  "outcomeContracts": {
+    "Issue refund": {
+      "impact": "money",
+      "approvalNode": "Approve refund",
+      "auditNode": "Record refund audit",
+      "failureNotificationNode": "Notify refund failure",
+      "amountGuard": { "node": "Limit refund amount", "maximum": 500, "currency": "USD" },
+      "counterpartyGuard": { "node": "Allow refund account", "allowed": ["merchant-primary"] },
+      "recovery": { "strategy": "compensate", "node": "Compensate transaction" }
+    }
+  }
+}
+```
+
+The checker verifies that referenced nodes exist, required gates dominate every entry path, approval/limit allow and deny branches are structural, a durable audit happens before the action, an atomic idempotency claim cannot be bypassed, failure notification is on the error branch, and recovery is represented in the graph.
+
+Run the outcome demo:
+
+```bash
+node bin/vibeflow.mjs check examples/unsafe-refund.workflow.json --fail-on never
+node bin/vibeflow.mjs check examples/safe-refund.workflow.json --config examples/outcome-contracts.vibeflow.json
+```
 
 Use `--locked` in untrusted CI. It rejects disabled or downgraded rules, changed vocabulary, and removal of default banned node types. The bundled GitHub Action always enables it.
 
@@ -74,7 +109,7 @@ Directories are searched recursively for `*.workflow.json` files.
 
 ```yaml
 - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
-- uses: domfelipe/vibeflow-n8n@4998605ed7dc12b9b867d69d7005d25778c7e109 # v0.8.0 code
+- uses: domfelipe/vibeflow-n8n@v0.9.0
   with:
     path: workflows/
     output: vibeflow.sarif
@@ -83,7 +118,7 @@ Directories are searched recursively for `*.workflow.json` files.
 ## Codex plugin
 
 ```bash
-codex plugin marketplace add domfelipe/vibeflow-n8n --ref 4998605ed7dc12b9b867d69d7005d25778c7e109
+codex plugin marketplace add domfelipe/vibeflow-n8n --ref v0.9.0
 ```
 
 Install **Vibeflow** from the Plugins Directory, then ask:
@@ -96,17 +131,19 @@ Use $vibeflow to audit this n8n workflow and fix blocking findings.
 
 No hosted service, new MCP server, workflow generation, telemetry, secret collection, or live n8n mutation. The CLI uses only the Node.js 20+ standard library.
 
+An outcome contract is structural evidence, not runtime enforcement. Money and customer-facing actions still need server-side amount and counterparty checks, atomic idempotency, approval authorization, durable audit storage, and tested recovery behavior at runtime.
+
 ## Documentation
 
 - [Product brief](docs/product-brief.md)
 - [Architecture and limitations](docs/architecture.md)
 - [Reproducible demo](docs/demo.md)
-- [v0.8.0 release audit](docs/release-audit.md)
+- [Release audit](docs/release-audit.md)
 - [Roadmap](docs/roadmap.md)
 - [Codex for Open Source application gate](docs/codex-for-oss-application.md)
 - [Contributing](CONTRIBUTING.md)
 - [Security](SECURITY.md)
 
-`v0.8.0` is the first executable release. The original documentation prototype is preserved at `legacy-v0.7.0`.
+`v0.9.0` adds outcome-aware preflight checks. `v0.8.0` remains the first executable release, and the original documentation prototype is preserved at `legacy-v0.7.0`.
 
 MIT licensed.
