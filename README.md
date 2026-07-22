@@ -139,6 +139,7 @@ An outcome contract is structural evidence, not runtime enforcement. Money and c
 - [Architecture and limitations](docs/architecture.md)
 - [Reproducible demo](docs/demo.md)
 - [Release audit](docs/release-audit.md)
+- [Community launch pack](docs/community-launch-v0.9.md)
 - [Roadmap](docs/roadmap.md)
 - [Codex for Open Source application gate](docs/codex-for-oss-application.md)
 - [Contributing](CONTRIBUTING.md)
