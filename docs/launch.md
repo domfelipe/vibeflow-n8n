@@ -26,3 +26,5 @@ A normal HTTP, database, or messaging node can refund money, contact a customer,
 > The new outcome contracts detect money, customer, privileged, and destructive-data actions — including ordinary HTTP nodes — and verify structural evidence for idempotency, approval, limits, durable audit, failure notification, and recovery. It is local, dependency-free, CI-friendly, and explicit about what still needs runtime enforcement.
 
 Link to the repository and the safe/unsafe refund demo. Ask users for anonymized workflows, classifier false positives/negatives, and missing domain actions.
+
+Ready-to-post Reddit and GitHub Discussion copy: [community-launch-v0.9.md](community-launch-v0.9.md).

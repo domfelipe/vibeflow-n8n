@@ -8,6 +8,8 @@ Program terms: <https://learn.chatgpt.com/docs/codex-for-oss-terms>
 
 Prepared: 2026-07-22
 
+Official form rechecked: 2026-07-22
+
 ## Recommendation
 
 Submit in **English**, even through the PT-BR form. OpenAI publishes no language requirement and no evidence that language changes selection odds. English is recommended only to reduce translation friction for a global technical review.
@@ -38,11 +40,11 @@ Submit immediately after the v0.9.0 release on 2026-07-24. Do not wait for arbit
 
 ### Maintainer role
 
-Select: **Principal maintainer**.
+Select: **Primary maintainer**.
 
 ### Why is this repository eligible?
 
-Recount before submission; keep under 500 characters.
+Character count: **356/500**.
 
 > Vibeflow is an MIT-licensed safety gate for AI-generated n8n workflows, rebuilt end-to-end with Codex. It audited a real 92-node workflow in read-only mode, finding 3 blocking risks and 57 warnings. Community feedback then shaped v0.9: outcome-aware checks for refunds, customer actions, silent failures, audit, idempotency, approval, limits, and recovery.
 
@@ -67,7 +69,7 @@ Character count: **390/500**.
 
 ### Anything else we should know?
 
-Recount before submission; keep under 500 characters.
+Character count: **381/500**.
 
 > Vibeflow is a public case study in Codex-native OSS development. Codex drove the project from product repositioning through implementation, adversarial review, remediation, CI, plugin packaging, releases, a real-workflow audit, and the v0.9 response to user feedback. Adoption is early, but the engineering, maintenance history, and real-world evidence are public and reproducible.
 
@@ -97,6 +99,7 @@ Use these links only if OpenAI requests verification; the form has no dedicated 
 - Release and Red Team audit: <https://github.com/domfelipe/vibeflow-n8n/blob/main/docs/release-audit.md>
 - CI history: <https://github.com/domfelipe/vibeflow-n8n/actions/workflows/ci.yml>
 - Launch discussion: <https://github.com/domfelipe/vibeflow-n8n/discussions/3>
+- Public r/n8n feedback that shaped v0.9: <https://www.reddit.com/r/n8n/comments/1v3is1w/i_built_an_opensource_safety_gate_for_aigenerated/>
 - Engineering PRs: <https://github.com/domfelipe/vibeflow-n8n/pulls?q=is%3Apr+is%3Amerged>
 
 ## Evidence snapshot
@@ -107,8 +110,9 @@ Refresh this section on 2026-07-24 immediately before submission. Current candid
 - `v0.9.0` release candidate, with v0.8.0 already public;
 - 36 adversarial tests passing locally and in remote Node.js 20, 22, and 24 CI;
 - dependency-free CLI, GitHub Action, and installable Codex plugin;
-- 3 prior maintainer PRs merged with green CI; add the v0.9 PR after merge;
+- 5 maintainer PRs merged with green CI, including the v0.9 implementation PR;
 - 2 stars, 0 forks, and no verified external contributor yet;
+- public r/n8n launch thread with several substantive comments that directly shaped VF010-VF013;
 - first real audit: anonymized 92-node workflow, 3 blocking findings, 57 warnings, no workflow mutation;
 - Codex used across product repositioning, implementation, review, Red Team, remediation, packaging, CI, release, real-workflow audit, and the community-feedback-driven v0.9 cycle.
 
