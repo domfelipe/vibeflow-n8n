@@ -1,0 +1,14 @@
+{
+  "$schema": "./schemas/vibeflow-config.schema.json",
+  "rules": {
+    "VF001": "error",
+    "VF002": "error",
+    "VF003": "warning",
+    "VF004": "warning",
+    "VF005": "warning",
+    "VF006": "error",
+    "VF007": "warning",
+    "VF008": "warning",
+    "VF009": "warning"
+  }
+}

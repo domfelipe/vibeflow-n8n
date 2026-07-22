@@ -1,0 +1,99 @@
+{
+  "name": "Safe support agent",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Authenticated Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "authentication": "headerAuth", "path": "support" },
+      "credentials": { "httpHeaderAuth": { "id": "credential-reference", "name": "Webhook Header Auth" } }
+    },
+    {
+      "id": "dedupe",
+      "name": "Claim idempotency event",
+      "type": "n8n-nodes-base.postgres",
+      "onError": "continueErrorOutput",
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO event_ledger (event_id) VALUES ($1) ON CONFLICT (event_id) DO NOTHING RETURNING event_id",
+        "queryReplacement": "={{ $json.event_id }}"
+      },
+      "credentials": { "postgres": { "id": "credential-reference", "name": "Event Ledger" } }
+    },
+    {
+      "id": "ledger-failure",
+      "name": "Ledger failure stop",
+      "type": "n8n-nodes-base.noOp",
+      "parameters": {}
+    },
+    {
+      "id": "enabled",
+      "name": "Agent enabled kill switch",
+      "type": "n8n-nodes-base.if",
+      "parameters": { "conditions": { "boolean": [{ "value1": "={{ $json.agent_enabled }}", "value2": true }] } }
+    },
+    {
+      "id": "agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "parameters": { "text": "={{ $json.body.message }}" }
+    },
+    {
+      "id": "model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "parameters": { "modelName": "gpt-4.1-mini" },
+      "credentials": { "openAiApi": { "id": "credential-reference", "name": "OpenAI" } }
+    },
+    {
+      "id": "confidence",
+      "name": "Confidence gate",
+      "type": "n8n-nodes-base.if",
+      "parameters": { "conditions": { "number": [{ "value1": "={{ $json.confidence }}", "operation": "smaller", "value2": 0.7 }] } }
+    },
+    {
+      "id": "handoff",
+      "name": "Human handoff ticket",
+      "type": "n8n-nodes-base.slack",
+      "onError": "continueErrorOutput",
+      "parameters": { "channel": "support", "text": "={{ $json.summary }}" }
+    },
+    {
+      "id": "handoff-failure",
+      "name": "Handoff failure stop",
+      "type": "n8n-nodes-base.noOp",
+      "parameters": {}
+    },
+    {
+      "id": "response",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "parameters": { "respondWith": "json", "responseBody": "={{ $json }}" }
+    }
+  ],
+  "connections": {
+    "Authenticated Webhook": { "main": [[{ "node": "Claim idempotency event", "type": "main", "index": 0 }]] },
+    "Claim idempotency event": {
+      "main": [
+        [{ "node": "Agent enabled kill switch", "type": "main", "index": 0 }],
+        [{ "node": "Ledger failure stop", "type": "main", "index": 0 }]
+      ]
+    },
+    "Agent enabled kill switch": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }], []] },
+    "OpenAI Chat Model": { "ai_languageModel": [[{ "node": "AI Agent", "type": "ai_languageModel", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Confidence gate", "type": "main", "index": 0 }]] },
+    "Confidence gate": {
+      "main": [
+        [{ "node": "Human handoff ticket", "type": "main", "index": 0 }],
+        [{ "node": "Respond to Webhook", "type": "main", "index": 0 }]
+      ]
+    },
+    "Human handoff ticket": {
+      "main": [
+        [],
+        [{ "node": "Handoff failure stop", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionTimeout": 120 }
+}

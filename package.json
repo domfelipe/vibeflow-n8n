@@ -1,0 +1,38 @@
+{
+  "name": "vibeflow-n8n",
+  "version": "0.8.0",
+  "description": "Safety and contract checks for AI-generated n8n workflows",
+  "type": "module",
+  "bin": {
+    "vibeflow": "./bin/vibeflow.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "schemas",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "node ./bin/vibeflow.mjs check ./examples/safe-support-agent.workflow.json",
+    "test": "node --test",
+    "verify": "npm test && npm run check && npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domfelipe/vibeflow-n8n.git"
+  },
+  "keywords": [
+    "n8n",
+    "workflow",
+    "security",
+    "lint",
+    "ai-agents",
+    "codex"
+  ],
+  "author": "Felipe Domingues",
+  "license": "MIT"
+}

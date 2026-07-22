@@ -1,0 +1,22 @@
+name: Bug report
+description: Report incorrect CLI behavior
+title: "bug: "
+labels: [bug]
+body:
+  - type: textarea
+    attributes:
+      label: Minimal workflow
+      description: Attach an anonymized workflow or the smallest JSON that reproduces the problem. Never include credentials.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Command and output
+      render: shell
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Vibeflow and Node.js versions
+    validations:
+      required: true

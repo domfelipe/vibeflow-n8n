@@ -1,79 +1,29 @@
 # Contributing
 
-Thanks for contributing to Vibeflow n8n.
+Vibeflow favors small, evidence-backed rules over broad heuristics.
 
-We want this project to stay practical, readable, and friendly to contributors.
+## Development
 
-## What contributions are welcome
+Node.js 20 or newer is required. No dependency installation is needed.
 
-- new recipes
-- better examples
-- client-specific setup improvements
-- docs clarifications
-- prompt refinements
-- validation heuristics
-- packaging improvements for open-source distribution
+```bash
+npm test
+npm run check
+npm pack --dry-run
+```
 
-## Contribution principles
+## Policy changes
 
-- prefer clarity over cleverness
-- keep examples realistic
-- avoid vendor lock where possible
-- document assumptions explicitly
-- keep the user experience friendly for non-experts
+A policy change must include:
 
-## Branch naming
+1. A stable rule ID and remediation in `src/vibeflow.mjs`.
+2. Configuration support in the JSON schema.
+3. A fixture proving the unsafe case.
+4. A safe fixture or test guarding against the likely false positive.
+5. Updated user and Codex policy documentation.
 
-Suggested branch prefixes:
-- `feat/`
-- `fix/`
-- `docs/`
-- `chore/`
-- `recipe/`
+Rules that cannot produce deterministic results from exported JSON belong outside the core CLI.
 
-Examples:
-- `feat/add-plan-schema`
-- `docs/improve-opencode-guide`
-- `recipe/lead-qualification-pack`
+Keep pull requests focused. Show the smallest failing workflow and the before/after CLI output. Never submit real credentials or customer data.
 
-## Pull requests
-
-A good PR should:
-- explain the problem,
-- describe the change,
-- note any breaking behavior,
-- include updated docs when needed,
-- include an example when behavior changes.
-
-## Documentation expectations
-
-If you change the skill behavior, also update at least one of:
-- `docs/skill-spec.md`
-- `docs/conversation-contract.md`
-- `templates/system-prompt.md`
-- `examples/`
-
-## Recipes
-
-When adding a recipe, include:
-- scenario summary,
-- ideal intake questions,
-- suggested node structure,
-- common risks,
-- validation notes,
-- sample final report excerpt.
-
-## Style guide
-
-- use markdown
-- keep sections short and scannable
-- write for builders, not only prompt engineers
-- avoid unnecessary jargon
-
-## Release notes
-
-When your change matters to users, update `CHANGELOG.md`.
-
-## Security-sensitive changes
-
-If your contribution touches secrets, auth, external communication, or destructive actions, also review `SECURITY.md`.
+Participation is governed by the [code of conduct](CODE_OF_CONDUCT.md).

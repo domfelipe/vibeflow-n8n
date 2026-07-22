@@ -1,0 +1,34 @@
+name: "Vibeflow n8n safety gate"
+description: "Audit an exported n8n workflow and fail on blocking safety findings"
+author: "Felipe Domingues"
+inputs:
+  path:
+    description: "Workflow JSON file or directory containing *.workflow.json files"
+    required: false
+    default: "."
+  format:
+    description: "Report format: text, json, or sarif"
+    required: false
+    default: "sarif"
+  output:
+    description: "Report output path"
+    required: false
+    default: "vibeflow.sarif"
+  fail-on:
+    description: "Failure threshold: error, warning, or never"
+    required: false
+    default: "error"
+runs:
+  using: "composite"
+  steps:
+    - name: Run Vibeflow
+      shell: bash
+      env:
+        VIBEFLOW_INPUT_PATH: ${{ inputs.path }}
+        VIBEFLOW_INPUT_FORMAT: ${{ inputs.format }}
+        VIBEFLOW_INPUT_OUTPUT: ${{ inputs.output }}
+        VIBEFLOW_INPUT_FAIL_ON: ${{ inputs.fail-on }}
+      run: >-
+        node "$GITHUB_ACTION_PATH/bin/vibeflow.mjs" check "$VIBEFLOW_INPUT_PATH"
+        --format "$VIBEFLOW_INPUT_FORMAT" --output "$VIBEFLOW_INPUT_OUTPUT"
+        --fail-on "$VIBEFLOW_INPUT_FAIL_ON" --locked

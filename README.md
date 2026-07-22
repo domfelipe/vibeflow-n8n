@@ -1,471 +1,112 @@
- # ⚡ Vibeflow n8n
+# Vibeflow
 
-<div align="center">
-   
+[![CI](https://github.com/domfelipe/vibeflow-n8n/actions/workflows/ci.yml/badge.svg)](https://github.com/domfelipe/vibeflow-n8n/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-### Build complete n8n workflows through MCP with any coding agent.
+**Safety and contract checks for AI-generated n8n workflows.**
 
-**Vibe code your automation. Let the agent handle the wiring.**
+Vibeflow answers one question before deployment: **does this workflow deserve to reach production?**
 
-Create, update, and validate n8n workflows using **Codex CLI**, **Claude Code**, **OpenCode**, and other MCP-capable coding agents.
+It inspects exported n8n JSON for embedded secrets, dangerous nodes, exposed webhooks, missing failure paths, absent idempotency, unsafe AI paths, unbounded execution, and risky retries.
 
-[![Version](https://img.shields.io/badge/version-0.7.0-black)](#-release-notes)
-[![n8n](https://img.shields.io/badge/n8n-MCP%20workflows-ff6d00)](#-why-vibeflow)
-[![MCP](https://img.shields.io/badge/MCP-agent%20compatible-blue)](#-supported-clients)
-[![License](https://img.shields.io/badge/license-MIT-green)](./LICENSE)
-[![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen)](#-contributing)
+Vibeflow is not another workflow builder or MCP server. It is a deterministic quality gate for workflows built by people or agents.
 
-</div>
-
----
-
-## ✨ What is Vibeflow n8n?
-
-**Vibeflow n8n** is an open-source skill kit for coding agents that lets anyone describe an automation in natural language and have the agent:
-
-1. **ask the right questions**
-2. **generate a structured plan**
-3. **build the workflow in n8n through MCP**
-4. **validate the result**
-5. **return a clean implementation report**
-
-Instead of wrestling with nodes, expressions, branching logic, and half-finished drafts, you get a guided workflow-building experience designed for **vibe coding with real structure**.
-
----
-
-## 🔥 Why Vibeflow?
-
-Most agent-based automation flows fail for predictable reasons:
-
-* they start building too early
-* they skip business rules
-* they assume credentials and app behavior
-* they produce fragile workflows with no validation
-* they leave the user with a maze instead of an automation
-
-**Vibeflow n8n** fixes that by forcing a better sequence:
-
-* **brief first** 🧠
-* **plan next** 🗺️
-* **build with MCP** 🔧
-* **validate before delivery** ✅
-* **report what was done and what is missing** 📦
-
-It is opinionated in the useful places and flexible where real-world workflows vary.
-
----
-
-## 🧭 How it works
-
-```mermaid
-flowchart LR
-    A[User describes workflow] --> B[Agent runs intake]
-    B --> C[Plan is normalized]
-    C --> D[Workflow built via n8n MCP]
-    D --> E[Validation and assumptions]
-    E --> F[Final delivery report]
-```
-
-### The default flow
-
-* **Intake**: understand goal, trigger, systems, outputs, business rules, and exceptions
-* **Planning**: transform free-form input into a structured build plan
-* **Execution**: create or update the workflow in n8n through MCP
-* **Validation**: inspect missing credentials, placeholders, trigger logic, branches, and node naming
-* **Delivery**: summarize what was created and what still needs manual configuration
-
----
-
-## 🧩 Supported clients
-
-Vibeflow is built for **MCP-capable coding agents**.
-
-### Officially documented in this repo
-
-* **Codex CLI**
-* **Claude Code**
-* **OpenCode**
-* **Community / experimental MCP clients**
-
-See:
-
-* [`clients/codex/`](./clients/codex)
-* [`clients/claude-code/`](./clients/claude-code)
-* [`clients/opencode/`](./clients/opencode)
-* [`clients/openclaude/`](./clients/openclaude)
-
----
-
-## 🛠️ What you can build
-
-### Growth and ops
-
-* lead triage pipelines
-* AI lead enrichment
-* CRM qualification flows
-* inbound webhook routers
-* campaign handoff automations
-
-### Support workflows
-
-* support triage
-* escalation routing
-* Slack to Notion triage
-* ticket classification and enrichment
-
-### Finance and back office
-
-* invoice reminders
-* approval flows
-* billing follow-ups
-* notification pipelines
-
-### AI-powered workflows
-
-* summarize incoming data
-* classify requests
-* enrich records with LLM outputs
-* hand off low-confidence cases for review
-
----
-
-## 🚀 Quick start
-
-### 1. Clone the repository
+## Quick start
 
 ```bash
-git clone https://github.com/domfelipe/vibeflow-n8n.git
-cd vibeflow-n8n
+npx --yes github:domfelipe/vibeflow-n8n#v0.8.0 check workflow.json
 ```
 
-### 2. Connect an MCP-compatible coding agent
+Or from a checkout:
 
-Pick your client and configure it using the examples in the `clients/` folder.
+```bash
+node bin/vibeflow.mjs check workflow.json
+```
 
-### 3. Point your agent to Vibeflow instructions
-
-Use the prompt and behavioral contract from:
-
-* [`templates/system-prompt.md`](./templates/system-prompt.md)
-* [`docs/conversation-contract.md`](./docs/conversation-contract.md)
-* [`docs/skill-spec.md`](./docs/skill-spec.md)
-
-### 4. Ask for a workflow
-
-Example prompt:
+A safe workflow exits `0`. Blocking findings exit `1`; invalid usage exits `2`.
 
 ```text
-Build an n8n workflow that receives leads from a webhook, enriches them with AI, sends qualified leads to HubSpot, and notifies Slack when confidence is low.
+✖ examples/unsafe-support-agent.workflow.json (Unsafe support agent)
+  ERROR VF001 [Send response] Literal secret-like value
+  ERROR VF002 [Run Shell] Host-level node is blocked
+  ERROR VF006 [AI Agent] No upstream kill switch
+
+Checked 1 workflow(s): 3 error(s), 8 warning(s)
 ```
 
-### 5. Review the plan, then build
+Run the reproducible fixtures:
 
-The agent should:
+```bash
+node bin/vibeflow.mjs check examples/safe-support-agent.workflow.json
+node bin/vibeflow.mjs check examples/unsafe-support-agent.workflow.json --fail-on never
+```
 
-* ask follow-up questions only when needed
-* create a structured plan
-* build in n8n via MCP
-* validate the result
-* deliver a final report
+## Policies
 
----
+| ID | Default | Check |
+|---|---|---|
+| VF000 | error | Valid n8n workflow JSON |
+| VF001 | error | Literal credentials in node parameters |
+| VF002 | error | Host-level command, SSH, and local-file nodes |
+| VF003 | warning | Webhooks without supported auth and a credential reference |
+| VF004 | warning | External actions without a connected failure path |
+| VF005 | warning | Inbound side effects without an atomic idempotency claim |
+| VF006 | error | AI entry paths that bypass a structural kill switch |
+| VF007 | warning | AI paths without a reachable external human handoff |
+| VF008 | warning | Workflows without a 1-3600 second execution timeout |
+| VF009 | warning | Retries without idempotency, bounds, or backoff |
 
-## 🧠 Core design principles
+Static analysis cannot prove runtime correctness. Configure severity and domain vocabulary in `.vibeflow.json`; document every waiver.
 
-### 1. Plan before touching n8n
+Use `--locked` in untrusted CI. It rejects disabled or downgraded rules, changed vocabulary, and removal of default banned node types. The bundled GitHub Action always enables it.
 
-No blind node generation.
+## Automation
 
-### 2. Ask only what changes the build
+```bash
+vibeflow check workflow.json --format json
+vibeflow check workflow.json --format sarif --output vibeflow.sarif
+vibeflow check workflows/ --fail-on warning
+```
 
-No interrogation theater.
+Directories are searched recursively for `*.workflow.json` files.
 
-### 3. Defaults should be helpful
+### GitHub Action
 
-The agent should use safe, practical assumptions when possible.
+```yaml
+- uses: actions/checkout@v4
+- uses: domfelipe/vibeflow-n8n@v0.8.0
+  with:
+    path: workflows/
+    output: vibeflow.sarif
+```
 
-### 4. Report assumptions clearly
+## Codex plugin
 
-What was inferred should never be hidden.
+```bash
+codex plugin marketplace add domfelipe/vibeflow-n8n
+```
 
-### 5. Output should be editable by humans
-
-The workflow must still make sense inside n8n.
-
----
-
-## 📁 Repository structure
+Install **Vibeflow** from the Plugins Directory, then ask:
 
 ```text
-vibeflow-n8n/
-├── clients/
-│   ├── claude-code/
-│   ├── codex/
-│   ├── opencode/
-│   └── openclaude/
-├── docs/
-│   ├── architecture.md
-│   ├── conversation-contract.md
-│   ├── getting-started.md
-│   ├── github-launch.md
-│   ├── install.md
-│   ├── roadmap.md
-│   └── tutorial-subir-github.md
-├── examples/
-│   ├── sample-plan.json
-│   └── sample-workflow-export.json
-├── recipes/
-│   ├── ai-lead-enrichment.md
-│   ├── customer-support-escalation.md
-│   ├── hubspot-to-slack-qualification.md
-│   ├── invoice-reminder.md
-│   ├── lead-triage.md
-│   ├── slack-to-notion-triage.md
-│   └── support-triage.md
-├── schemas/
-│   └── plan.schema.json
-├── templates/
-│   ├── final-report-template.md
-│   ├── intake-checklist.md
-│   └── system-prompt.md
-└── README.md
+Use $vibeflow to audit this n8n workflow and fix blocking findings.
 ```
 
----
+## Boundaries
 
-## ⚙️ Build contract
+No hosted service, new MCP server, workflow generation, telemetry, secret collection, or live n8n mutation. The CLI uses only the Node.js 20+ standard library.
 
-Vibeflow expects agents to move through these stages:
+## Documentation
 
-### Intake
+- [Product brief](docs/product-brief.md)
+- [Architecture and limitations](docs/architecture.md)
+- [Reproducible demo](docs/demo.md)
+- [v0.8.0 release audit](docs/release-audit.md)
+- [Roadmap](docs/roadmap.md)
+- [Codex for Open Source application gate](docs/codex-for-oss-application.md)
+- [Contributing](CONTRIBUTING.md)
+- [Security](SECURITY.md)
 
-Capture:
+`v0.8.0` is the first executable release. The original documentation prototype is preserved at `legacy-v0.7.0`.
 
-* workflow goal
-* trigger type
-* systems involved
-* desired output
-* business rules
-* exceptions
-* approval needs
-
-### Planning
-
-Generate a normalized plan with:
-
-* summary
-* trigger
-* apps and services
-* implementation steps
-* edge cases
-* validation checklist
-* required credentials
-* unresolved questions
-
-### Execution
-
-Use MCP to:
-
-* create or update the workflow
-* name nodes clearly
-* preserve readability
-* add placeholders where secrets are missing
-
-### Validation
-
-Check for:
-
-* broken branches
-* missing credentials
-* malformed assumptions
-* unclear node naming
-* weak error handling
-
-### Delivery
-
-Return:
-
-* what was built
-* what was assumed
-* what still needs manual setup
-* how to test it
-* suggested upgrades
-
----
-
-## 📦 Example use cases
-
-### Example 1: Lead routing
-
-> “Build a workflow that receives website leads, scores them, enriches them with AI, and sends only qualified ones to HubSpot.”
-
-### Example 2: Support escalation
-
-> “Create a workflow that watches urgent support requests, classifies them, escalates high-risk cases to Slack, and creates a tracking record.”
-
-### Example 3: Billing reminder
-
-> “Build a recurring workflow that checks unpaid invoices every weekday and sends reminders only when due dates are inside policy.”
-
-See the full set in [`recipes/`](./recipes).
-
----
-
-## 🖼️ Demo flow
-
-A clean public demo usually looks like this:
-
-1. show the natural-language request
-2. show the planning output
-3. show the workflow created in n8n
-4. show the final delivery report
-
-Helpful references:
-
-* [`docs/demo-script.md`](./docs/demo-script.md)
-* [`docs/real-demo-playbook.md`](./docs/real-demo-playbook.md)
-* [`docs/showcase-checklist.md`](./docs/showcase-checklist.md)
-
----
-
-## 📚 Documentation
-
-### Start here
-
-* [`docs/getting-started.md`](./docs/getting-started.md)
-* [`docs/install.md`](./docs/install.md)
-* [`docs/architecture.md`](./docs/architecture.md)
-
-### Agent behavior
-
-* [`docs/skill-spec.md`](./docs/skill-spec.md)
-* [`docs/conversation-contract.md`](./docs/conversation-contract.md)
-* [`templates/system-prompt.md`](./templates/system-prompt.md)
-
-### Publishing and community
-
-* [`docs/github-launch.md`](./docs/github-launch.md)
-* [`docs/community-onboarding.md`](./docs/community-onboarding.md)
-* [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-* [`SECURITY.md`](./SECURITY.md)
-
----
-
-## 🌍 Who is this for?
-
-Vibeflow is a good fit for:
-
-* automation builders using n8n
-* developers who prefer CLI agents
-* consultants delivering automation fast
-* internal ops teams
-* founders building workflows without a huge engineering ceremony
-* anyone who likes **vibe coding**, but also likes finishing things
-
----
-
-## 🧪 Status
-
-Vibeflow is currently a **skill kit / workflow-building framework for coding agents**, with practical support material for MCP-based clients and progressive improvements across releases.
-
-If you want the fastest route to value, start with:
-
-* one recipe
-* one client
-* one end-to-end demo
-
-Then expand.
-
----
-
-## 🗺️ Roadmap
-
-Planned areas of evolution:
-
-* richer client-specific setup examples
-* more production-grade workflow recipes
-* exportable demo workflows
-* stronger plan validation
-* public demo assets and GIFs
-* starter kits by domain
-
-See [`docs/roadmap.md`](./docs/roadmap.md).
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome.
-
-You can help by:
-
-* improving docs
-* adding recipes
-* refining client setup guides
-* validating agent behavior in real workflows
-* contributing examples and demos
-
-Start here:
-
-* [`CONTRIBUTING.md`](./CONTRIBUTING.md)
-* [`.github/ISSUE_TEMPLATE/`](./.github/ISSUE_TEMPLATE)
-* [`.github/DISCUSSION_TEMPLATE/`](./.github/DISCUSSION_TEMPLATE)
-
----
-
-## 🛡️ Security
-
-Please do **not** commit secrets, credentials, or private tokens.
-
-If you find a security issue, check [`SECURITY.md`](./SECURITY.md).
-
----
-
-## 📝 Release notes
-
-Recent release materials:
-
-* [`docs/release-v0.7.0.md`](./docs/release-v0.7.0.md)
-* [`CHANGELOG.md`](./CHANGELOG.md)
-
----
-
-## 💬 Community
-
-This project is designed to become easier the more people share their patterns.
-
-If you build something cool with Vibeflow:
-
-* open a discussion
-* share your workflow idea
-* submit a recipe
-* improve the docs for the next builder
-
----
-
-## ⭐ Support the project
-
-If this repo helps you build better automations:
-
-* give it a star
-* share it with your team
-* open an issue with ideas
-* contribute a recipe or improvement
-
-That kind of signal helps the project grow legs.
-
----
-
-## 📄 License
-
-This project is available under the terms of the license in [`LICENSE`](./LICENSE).
-
----
-
-<div align="center">
-
-### ⚡ Vibeflow n8n
-
-**Describe the workflow. Vibe code the idea. Let the agent build the machinery.**
-
-</div>
+MIT licensed.

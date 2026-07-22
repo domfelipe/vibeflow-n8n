@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/domfelipe/vibeflow-n8n/schemas/vibeflow-config.schema.json",
+  "title": "Vibeflow configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "rules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "VF001": { "$ref": "#/$defs/severity" },
+        "VF002": { "$ref": "#/$defs/severity" },
+        "VF003": { "$ref": "#/$defs/severity" },
+        "VF004": { "$ref": "#/$defs/severity" },
+        "VF005": { "$ref": "#/$defs/severity" },
+        "VF006": { "$ref": "#/$defs/severity" },
+        "VF007": { "$ref": "#/$defs/severity" },
+        "VF008": { "$ref": "#/$defs/severity" },
+        "VF009": { "$ref": "#/$defs/severity" }
+      }
+    },
+    "terms": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "killSwitch": { "$ref": "#/$defs/terms" },
+        "humanHandoff": { "$ref": "#/$defs/terms" },
+        "idempotency": { "$ref": "#/$defs/terms" }
+      }
+    },
+    "bannedNodeTypes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 200 },
+      "maxItems": 1000,
+      "uniqueItems": true
+    }
+  },
+  "$defs": {
+    "severity": { "enum": ["error", "warning", "off"] },
+    "terms": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 100 },
+      "minItems": 1,
+      "maxItems": 100,
+      "uniqueItems": true
+    }
+  }
+}

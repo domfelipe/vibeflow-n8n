@@ -1,0 +1,20 @@
+{
+  "name": "vibeflow",
+  "interface": {
+    "displayName": "Vibeflow"
+  },
+  "plugins": [
+    {
+      "name": "vibeflow",
+      "source": {
+        "source": "local",
+        "path": "./plugins/vibeflow"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

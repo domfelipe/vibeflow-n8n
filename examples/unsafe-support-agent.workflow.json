@@ -1,0 +1,43 @@
+{
+  "name": "Unsafe support agent",
+  "nodes": [
+    {
+      "id": "webhook",
+      "name": "Public Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "parameters": { "path": "support" }
+    },
+    {
+      "id": "agent",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "parameters": { "text": "Respond to the customer" }
+    },
+    {
+      "id": "api",
+      "name": "Send response",
+      "type": "n8n-nodes-base.httpRequest",
+      "retryOnFail": true,
+      "maxTries": 10,
+      "waitBetweenTries": 0,
+      "parameters": {
+        "url": "https://api.example.com/messages",
+        "headerParameters": {
+          "parameters": [{ "name": "Authorization", "value": "Bearer vf_fake_0123456789abcdef" }]
+        }
+      }
+    },
+    {
+      "id": "shell",
+      "name": "Run Shell",
+      "type": "n8n-nodes-base.executeCommand",
+      "parameters": { "command": "echo done" }
+    }
+  ],
+  "connections": {
+    "Public Webhook": { "main": [[{ "node": "AI Agent", "type": "main", "index": 0 }]] },
+    "AI Agent": { "main": [[{ "node": "Send response", "type": "main", "index": 0 }]] },
+    "Send response": { "main": [[{ "node": "Run Shell", "type": "main", "index": 0 }]] }
+  },
+  "settings": {}
+}

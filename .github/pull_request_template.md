@@ -1,14 +1,11 @@
-## What changed
+## Risk addressed
 
-Describe the main changes in this PR.
+Describe the workflow failure or false positive this change addresses.
 
-## Why
+## Evidence
 
-Explain the problem or improvement.
-
-## Checklist
-
-- [ ] Docs updated if behavior changed
-- [ ] Examples updated if needed
-- [ ] Changelog updated if user-visible
-- [ ] No unsafe assumptions introduced
+- [ ] Added or updated a minimal unsafe fixture.
+- [ ] Added a safe fixture or regression test.
+- [ ] `npm run verify` passes.
+- [ ] No credentials or customer data are included.
+- [ ] Policy and Codex documentation match the implementation.

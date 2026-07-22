@@ -1,0 +1,33 @@
+name: Policy rule proposal
+description: Propose a deterministic check backed by exported workflow JSON
+title: "rule: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: failure
+    attributes:
+      label: Production failure
+      description: What concrete failure would this rule prevent?
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Static evidence
+      description: Which exported JSON fields prove the unsafe and safe cases?
+    validations:
+      required: true
+  - type: textarea
+    id: fixtures
+    attributes:
+      label: Minimal fixtures
+      description: Paste anonymized unsafe and safe examples, or link to a branch containing them.
+    validations:
+      required: true
+  - type: textarea
+    id: false-positives
+    attributes:
+      label: False-positive boundary
+      description: When should this rule deliberately stay silent?
+    validations:
+      required: true

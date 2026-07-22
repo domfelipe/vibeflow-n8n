@@ -9,5 +9,8 @@
 .vscode/
 .idea/
 
-# demo exports
-assets/private/
+# local build output
+node_modules/
+*.tgz
+vibeflow.sarif
+.vibeflow.local.json

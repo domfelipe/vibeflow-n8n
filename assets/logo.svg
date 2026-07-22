@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Vibeflow n8n logo">
-  <rect width="512" height="512" rx="96" fill="#0b1020"/>
-  <path d="M116 320 L196 160 L256 280 L316 160 L396 320" fill="none" stroke="#7fd0ff" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="196" cy="160" r="18" fill="#ffffff"/>
-  <circle cx="256" cy="280" r="18" fill="#ffffff"/>
-  <circle cx="316" cy="160" r="18" fill="#ffffff"/>
-  <text x="120" y="410" fill="#f4f7ff" font-family="Arial, Helvetica, sans-serif" font-size="54" font-weight="700">Vibeflow</text>
-</svg>

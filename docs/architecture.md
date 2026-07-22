@@ -1,160 +1,43 @@
 # Architecture
 
-## Purpose
-
-Vibeflow n8n is a skill-first architecture for building complete n8n workflows through MCP-capable coding agents.
-
-It is not a standalone runtime.
-It is a reusable behavioral layer that can be attached to different agent clients.
-
-## High-level components
-
-### 1. User
-The human describes the automation goal in natural language.
-
-### 2. Agent client
-A CLI or coding assistant that supports:
-- custom instructions / skills,
-- MCP connections,
-- conversational follow-ups,
-- optional local file awareness.
-
-Examples:
-- Codex CLI
-- Claude Code
-- OpenCode
-- compatible community forks
-
-### 3. Vibeflow skill layer
-This repository provides the skill logic:
-- how to interview the user,
-- how to normalize requirements,
-- how to decide what must be asked,
-- how to create a plan,
-- how to validate the build,
-- how to report completion.
-
-### 4. n8n MCP server
-The execution bridge between the agent and n8n.
-
-The skill does not directly manipulate n8n internals.
-It relies on the MCP-exposed capabilities available in the connected environment.
-
-### 5. n8n instance
-The target automation environment where workflows are created, updated, and later run.
-
-## Core architecture pattern
+## Data flow
 
 ```text
-User intent
-   -> Conversational intake
-   -> Normalized plan
-   -> MCP build actions
-   -> Validation pass
-   -> Human-readable handoff
+workflow JSON -> parser -> graph + parameter analysis -> findings -> text | JSON | SARIF
 ```
 
-## Why planning-first matters
+The CLI reads local files, validates their basic n8n shape, builds forward and reverse node graphs, runs deterministic policies, sorts findings, and sets an exit code from the selected threshold.
 
-Without a planning step, agents tend to:
-- over-assume missing requirements,
-- create brittle node graphs,
-- hide unresolved credential problems,
-- return workflows that are technically created but operationally confusing.
+## Components
 
-The plan acts like a blueprint before the steel beams go up.
+- `bin/vibeflow.mjs`: argument parsing, output selection, and exit codes.
+- `src/vibeflow.mjs`: configuration, file discovery, policies, graph traversal, and formatters.
+- `.vibeflow.json`: repository policy defaults.
+- `schemas/`: editor-facing configuration schema.
+- `examples/`: reproducible safe and unsafe workflows.
+- `plugins/vibeflow/`: Codex packaging; it calls the same CLI rather than duplicating policy logic.
+- `action.yml`: composite GitHub Action using the checked-in CLI.
 
-## Build stages
+## Policy model
 
-### Stage 1. Intake
-The agent captures:
-- business goal,
-- trigger,
-- systems involved,
-- desired output,
-- rules and exceptions.
+Rules have a stable ID, default severity, description, and remediation. Trusted local users may change severity, vocabulary, and banned node types. VF000 remains non-configurable because invalid input cannot be audited safely.
 
-### Stage 2. Requirement triage
-The agent separates:
-- critical unknowns,
-- optional detail,
-- safe defaults.
+Graph policies use the validated n8n `main` connection shape, not node order; AI resource wiring is not control flow. VF005 requires a high-confidence atomic ledger gate that emits no item for duplicate claims and dominates inbound paths to side effects. VF006 rejects any AI entry path that bypasses a positive IF check against a direct agent-status reference. VF007 requires a reachable external handoff action.
 
-### Stage 3. Normalized plan
-The agent produces a standard structure for execution.
-This makes behavior portable across clients.
+`--locked` rejects configuration that weakens built-in severity, changes safety vocabulary, or removes a default banned node. The GitHub Action always enables locked mode so a pull request cannot silence its own findings by editing `.vibeflow.json`.
 
-### Stage 4. MCP execution
-The agent creates or updates the workflow using the available MCP tools.
+## Trust boundaries
 
-### Stage 5. Validation
-The agent checks for:
-- broken graph structure,
-- missing dependencies,
-- unsupported assumptions,
-- absent failure branches,
-- unresolved placeholders.
+Workflow JSON is untrusted input. Vibeflow never evaluates expressions, imports workflow code, runs nodes, follows symlinks during directory discovery, or contacts URLs found in parameters. It caps files, bytes, nodes, edges, configuration vocabulary, and findings; graph traversal is iterative and linear in the validated graph.
 
-### Stage 6. Delivery
-The agent produces a report for the user that is operational, not ornamental.
+Output paths are selected by the caller. The GitHub Action passes inputs as quoted environment values.
 
-## Recommended workflow object model
+## Known limitations
 
-A normalized plan should include:
-- workflow_name
-- workflow_mode
-- business_goal
-- trigger
-- systems_involved
-- steps
-- branching_logic
-- data_contracts
-- credentials_required
-- risk_flags
-- error_handling
-- test_strategy
-- assumptions
-- open_questions
+- Static structure cannot prove that a condition, SQL claim, or handoff works at runtime.
+- Secret detection can miss unusual key names and can produce false positives.
+- Community nodes unknown to the side-effect catalog need explicit policy additions.
+- Locked mode protects policy content, but repository owners must still review changes to the CI workflow itself.
+- Runtime credentials, permissions, network controls, and n8n version compatibility remain outside the report.
 
-## Modes
-
-### fast
-Prototype-first mode.
-Uses more defaults and fewer follow-up questions.
-
-### balanced
-Default mode.
-Good mix of speed and operational sanity.
-
-### safe
-More explicit approvals, stronger validation, fewer silent assumptions.
-
-## Portability strategy
-
-The repository is intentionally text-first.
-That means:
-- prompts are markdown,
-- rules are markdown,
-- examples are markdown,
-- client-specific notes are lightweight.
-
-This keeps the project easy to adapt across agent ecosystems without locking it to a single vendor format.
-
-## Non-goals
-
-This repository does not try to:
-- replace n8n documentation,
-- replace the n8n MCP server,
-- become a full workflow execution engine,
-- hide MCP limitations,
-- generate production security posture automatically.
-
-## Future architecture extensions
-
-Potential future additions:
-- schema-driven plan JSON
-- linter rules for anti-pattern detection
-- recipe loader / scenario packs
-- test case generator
-- workflow diff summarizer
-- upgrade assistant for existing workflows
+These ceilings are deliberate. Add runtime integration only when real users demonstrate that static exports are insufficient.
