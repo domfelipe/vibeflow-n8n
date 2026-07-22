@@ -2,12 +2,18 @@
 
 ## Release gate
 
-- `npm run verify` passes on Node.js 20, 22, and 24.
-- Official skill and plugin validators pass.
-- Safe fixture exits 0; unsafe fixture exits 1.
-- SARIF is valid JSON and uploaded by CI.
-- Repository description and topics match the new product.
-- `v0.8.0` release notes match `CHANGELOG.md`.
+- [x] `npm run verify` passes on Node.js 20, 22, and 24 in CI.
+- [x] Official skill and plugin validators pass.
+- [x] Safe fixture exits 0; unsafe fixture exits 1.
+- [x] SARIF is valid JSON and uploaded by CI.
+- [x] Repository description and topics match the new product.
+- [x] `v0.8.0` release notes match `CHANGELOG.md`.
+- [x] Remote CLI and pinned Codex marketplace install successfully.
+- [x] Private vulnerability reporting and Discussions are enabled.
+
+Release: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.8.0>
+
+Launch discussion: <https://github.com/domfelipe/vibeflow-n8n/discussions/3>
 
 ## Announcement
 
