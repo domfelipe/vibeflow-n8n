@@ -41,7 +41,7 @@ At the 5,000-node limit, the corrected linear traversal completed the synthetic 
 - The package has no runtime dependencies and uses a publish allowlist.
 - The bundled action always enables `--locked`.
 
-The first merge SHA must replace mutable self-references in the README and Codex skill before the release tag is created.
+The first merge SHA, `4998605ed7dc12b9b867d69d7005d25778c7e109`, pins the CLI, GitHub Action, and Codex marketplace examples before the release tag is created.
 
 ## Residual limitations
 

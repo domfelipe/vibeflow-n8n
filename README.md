@@ -14,7 +14,7 @@ Vibeflow is not another workflow builder or MCP server. It is a deterministic qu
 ## Quick start
 
 ```bash
-npx --yes github:domfelipe/vibeflow-n8n#v0.8.0 check workflow.json
+npx --yes github:domfelipe/vibeflow-n8n#4998605ed7dc12b9b867d69d7005d25778c7e109 check workflow.json
 ```
 
 Or from a checkout:
@@ -73,8 +73,8 @@ Directories are searched recursively for `*.workflow.json` files.
 ### GitHub Action
 
 ```yaml
-- uses: actions/checkout@v4
-- uses: domfelipe/vibeflow-n8n@v0.8.0
+- uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+- uses: domfelipe/vibeflow-n8n@4998605ed7dc12b9b867d69d7005d25778c7e109 # v0.8.0 code
   with:
     path: workflows/
     output: vibeflow.sarif
@@ -83,7 +83,7 @@ Directories are searched recursively for `*.workflow.json` files.
 ## Codex plugin
 
 ```bash
-codex plugin marketplace add domfelipe/vibeflow-n8n
+codex plugin marketplace add domfelipe/vibeflow-n8n --ref 4998605ed7dc12b9b867d69d7005d25778c7e109
 ```
 
 Install **Vibeflow** from the Plugins Directory, then ask:
