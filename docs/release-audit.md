@@ -1,10 +1,10 @@
-# Release audit — v0.9.0 candidate
+# Release audit — v0.9.0
 
-Target release: 2026-07-24
+Released: 2026-07-23
 
 ## Decision
 
-**APTO COM RESSALVAS** for the Friday release, pending merge, tag, and released-install checks listed below.
+**APTO** within Vibeflow's documented static-preflight boundary.
 
 No blocking defect remains in the reviewed static-analysis boundary. Vibeflow can verify structural evidence in an exported workflow, but it cannot enforce authorization, amount limits, counterparty identity, audit durability, or recovery behavior in the executing systems.
 
@@ -16,6 +16,9 @@ No blocking defect remains in the reviewed static-analysis boundary. Vibeflow ca
 - Text, JSON, SARIF, configuration validation, package packing, and CLI exit behavior are exercised.
 - `npm run verify`, `npm audit --omit=dev`, JSON parsing, and `git diff --check` pass locally.
 - The package remains dependency-free and targets Node.js 20+.
+- The public `v0.9.0` tag resolves to release commit `7552eeca7cfdd56376eab2007988b81a9726fba4`.
+- The released GitHub CLI package passes the safe refund fixture with zero findings and reports VF010, VF012, and VF013 for the unsafe refund fixture.
+- The released Codex marketplace installs `vibeflow@vibeflow` version `0.9.0` in an isolated `CODEX_HOME`.
 
 ## Red Team
 
@@ -56,15 +59,15 @@ The graph checks use actual `main` edges, require dominating controls, and rejec
 - an exported graph cannot prove a referenced credential, approval identity, SQL policy, external API limit, notification, or compensation works at runtime;
 - custom/community nodes may need explicit impact declarations or new regression-backed adapters;
 - repository owners may intentionally weaken policy outside `--locked` mode;
-- remote Node 20/22/24 CI passed; released `npx`/plugin installation can only be confirmed after the candidate is tagged.
+- remote Node 20/22/24 CI and released `npx`/plugin installation passed.
 
 ## Release blockers
 
 - [x] Pull request CI passes on Node.js 20, 22, and 24.
-- [ ] Release commit is merged without unrelated changes.
-- [ ] `v0.9.0` tag and GitHub release are published on 2026-07-24.
-- [ ] Released CLI and Codex plugin install paths are smoke-tested.
+- [x] Release commit is merged without unrelated changes.
+- [x] `v0.9.0` tag and GitHub release are public.
+- [x] Released CLI and Codex plugin install paths are smoke-tested.
 
 ## Final gate
 
-There are zero known critical or high security findings in the candidate. The release remains **APTO COM RESSALVAS** until the remaining remote gates above are complete; a failed gate blocks publication or requires an immediate corrective release.
+There are zero known critical or high security findings in the released static-analysis boundary. Runtime enforcement remains explicitly outside the product claim.

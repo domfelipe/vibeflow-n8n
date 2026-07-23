@@ -4,7 +4,7 @@
 
 Ship the executable reset: CLI, nine configurable policies, fixtures, tests, SARIF, GitHub Action, and Codex plugin.
 
-## 0.9.0 — target 2026-07-24
+## 0.9.0 — shipped 2026-07-23
 
 Separate dangerous nodes from dangerous outcomes. Add VF010-VF013, explicit outcome contracts, graph evidence for policy gates, safe/unsafe refund fixtures, and clear runtime boundaries.
 

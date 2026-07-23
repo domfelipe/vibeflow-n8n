@@ -14,7 +14,7 @@ Official form rechecked: 2026-07-22
 
 Submit in **English**, even through the PT-BR form. OpenAI publishes no language requirement and no evidence that language changes selection odds. English is recommended only to reduce translation friction for a global technical review.
 
-Submit immediately after the v0.9.0 release on 2026-07-24. Do not wait for arbitrary star, fork, or PR targets. Vibeflow's strongest evidence is its Codex-native engineering, first real 92-node audit, and a public maintenance loop that turned community feedback into tested policy features.
+Submit now that v0.9.0 is public. Do not wait for arbitrary star, fork, or PR targets. Vibeflow's strongest evidence is its Codex-native engineering, first real 92-node audit, and a public maintenance loop that turned community feedback into tested policy features.
 
 ## Copy-and-paste form
 
@@ -94,7 +94,7 @@ These translations are for review only. Paste the English versions above into th
 Use these links only if OpenAI requests verification; the form has no dedicated evidence field.
 
 - Public MIT repository: <https://github.com/domfelipe/vibeflow-n8n>
-- Executable release after Friday launch: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.9.0>
+- Executable release: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.9.0>
 - Reproducible demo: <https://github.com/domfelipe/vibeflow-n8n/blob/main/docs/demo.md>
 - Release and Red Team audit: <https://github.com/domfelipe/vibeflow-n8n/blob/main/docs/release-audit.md>
 - CI history: <https://github.com/domfelipe/vibeflow-n8n/actions/workflows/ci.yml>
@@ -104,14 +104,14 @@ Use these links only if OpenAI requests verification; the form has no dedicated 
 
 ## Evidence snapshot
 
-Refresh this section on 2026-07-24 immediately before submission. Current candidate evidence:
+Captured on 2026-07-23 after release:
 
 - public repository with MIT license;
-- `v0.9.0` release candidate, with v0.8.0 already public;
+- public `v0.9.0` release, with v0.8.0 preserved in release history;
 - 36 adversarial tests passing locally and in remote Node.js 20, 22, and 24 CI;
 - dependency-free CLI, GitHub Action, and installable Codex plugin;
-- 5 maintainer PRs merged with green CI, including the v0.9 implementation PR;
-- 2 stars, 0 forks, and no verified external contributor yet;
+- 7 maintainer PRs merged with green CI, including the v0.9 implementation and release-evidence PR;
+- 4 stars, 0 forks, and no verified external contributor yet;
 - public r/n8n launch thread with several substantive comments that directly shaped VF010-VF013;
 - first real audit: anonymized 92-node workflow, 3 blocking findings, 57 warnings, no workflow mutation;
 - Codex used across product repositioning, implementation, review, Red Team, remediation, packaging, CI, release, real-workflow audit, and the community-feedback-driven v0.9 cycle.
@@ -133,7 +133,7 @@ The approved public description is: **“a real, production-scale 92-node conver
 
 - [x] Repository is public and not archived.
 - [x] GitHub username is public.
-- [x] Role is principal maintainer.
+- [x] Role is primary maintainer.
 - [x] Repository URL is correct.
 - [x] Both requested benefits are selected.
 - [x] All narrative answers are under 500 characters.
