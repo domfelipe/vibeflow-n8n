@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.0 - 2026-07-24
+## 0.9.0 - 2026-07-23
 
 - Added outcome-aware policies VF010-VF013 for money, customer, privileged, and destructive-data actions.
 - Added structurally verified outcome contracts for approval, durable audit, idempotency, amount and counterparty limits, failure notification, and recovery.

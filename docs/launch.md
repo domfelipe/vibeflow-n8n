@@ -1,6 +1,6 @@
 # v0.9.0 launch checklist
 
-Target: Friday, 2026-07-24
+Released: 2026-07-23
 
 ## Release gate
 
@@ -9,9 +9,11 @@ Target: Friday, 2026-07-24
 - [x] Local `npm run verify` and `npm audit --omit=dev` pass.
 - [x] QA, adversarial Red Team, and Guardião reviews are documented.
 - [x] Pull request CI passes on Node.js 20, 22, and 24.
-- [ ] Release commit is merged and tagged `v0.9.0`.
-- [ ] Released CLI and pinned Codex marketplace install successfully.
-- [ ] GitHub release is published on Friday.
+- [x] Release commit is merged and tagged `v0.9.0`.
+- [x] Released CLI and pinned Codex marketplace install successfully.
+- [x] GitHub release is public and marked latest.
+
+Release: <https://github.com/domfelipe/vibeflow-n8n/releases/tag/v0.9.0>
 
 ## Positioning
 
